@@ -1,0 +1,56 @@
+﻿<Page x:Class="PhotoViewer.View.LinkageProgramView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      mc:Ignorable="d" 
+      d:DesignHeight="400" d:DesignWidth="450"
+      Title="LinkageProgramView">
+    <Page.Background>
+        <SolidColorBrush Color="#F0F0F0"/>
+    </Page.Background>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="120"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="0" Margin="5,5,5,0">
+            <TextBlock Text="■ アプリ連携設定 ■" FontSize="32"/>
+            <StackPanel Orientation="Vertical" Margin="10,10">
+                <TextBlock Text="このアプリと編集アプリを連携します。" Margin="0,5,0,0" FontSize="18"/>
+                <TextBlock Text="以下の項目で設定してください。" Margin="0,5,0,0" FontSize="18"/>
+                <TextBlock Text="※ 連携したアプリは、各メディアファイルのコンテキストメニューより起動できます。" FontSize="12" Margin="0,10,0,0"/>
+            </StackPanel>
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="150"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Orientation="Vertical">
+                <StackPanel Margin="20,40,20,0" Height="20" Orientation="Horizontal">
+                    <TextBlock Text="連携アプリ1：" Height="20" FontSize="16" VerticalAlignment="Center"/>
+                    <TextBox VerticalAlignment="Center" VerticalContentAlignment="Center" IsReadOnly="True" Text="{Binding LinkAppPath1}" Height="20" Width="240"/>
+                    <Button Content="参照" FontSize="14" Command="{Binding LinkApp1ReferenceCommand}" VerticalAlignment="Center" Height="20" Margin="5,0,0,0"/>
+                    <Button Content="削除" FontSize="14" Command="{Binding LinkApp1DeleteCommand}" VerticalAlignment="Center" Height="20" Margin="5,0,0,0"/>
+                </StackPanel>
+                <StackPanel Margin="20,10,20,0" Height="20" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="連携アプリ2：" Height="20" FontSize="16" VerticalAlignment="Center"/>
+                    <TextBox VerticalAlignment="Center" VerticalContentAlignment="Center" IsReadOnly="True" Text="{Binding LinkAppPath2}" IsEnabled="{Binding LinkAppPath2IsEnable}"  Height="20" Width="240"/>
+                    <Button Content="参照" FontSize="14" Command="{Binding LinkApp2ReferenceCommand}" IsEnabled="{Binding LinkApp2ButtonIsEnable}" VerticalAlignment="Center" Height="20" Margin="5,0,0,0"/>
+                    <Button Content="削除" FontSize="14" Command="{Binding LinkApp2DeleteCommand}" VerticalAlignment="Center" Height="20" Margin="5,0,0,0"/>
+                </StackPanel>
+                <StackPanel Margin="20,10,20,0" Height="20" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="連携アプリ3：" Height="20" FontSize="16" VerticalAlignment="Center"/>
+                    <TextBox VerticalAlignment="Center" VerticalContentAlignment="Center" IsReadOnly="True" Text="{Binding LinkAppPath3}" IsEnabled="{Binding LinkAppPath3IsEnable}"  Height="20" Width="240"/>
+                    <Button Content="参照" FontSize="14" Command="{Binding LinkApp3ReferenceCommand}" IsEnabled="{Binding LinkApp3ButtonIsEnable}" VerticalAlignment="Center" Height="20" Margin="5,0,0,0"/>
+                    <Button Content="削除" FontSize="14" Command="{Binding LinkApp3DeleteCommand}" VerticalAlignment="Center" Height="20" Margin="5,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="登録" Command="{Binding RegisterLinkAppCommand}" Width="85" Height="30" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0"/>
+                <Button Content="全削除" Command="{Binding AllLinkAppDeleteCommand}" Width="85" Height="30" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,20,0"/>
+            </StackPanel>
+        </Grid> 
+    </Grid>
+</Page>

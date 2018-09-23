@@ -1,0 +1,221 @@
+﻿<Window x:Class="PhotoViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        ResizeMode="CanMinimize"
+        Icon="/Image/PhotoExifViewerIcon.ico"
+        WindowStartupLocation="CenterScreen"
+        Title="Photo Exif Viewer" Height="890" Width="1205"
+        Closing="Window_Closing">
+    <Window.Background>
+        <SolidColorBrush Color="#F0F0F0"/>
+    </Window.Background>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Rectangle Grid.Row="0" Fill="SkyBlue" Grid.ColumnSpan="2"/>
+        <TextBlock Grid.Row="0" Text="Photo Exif Viewer" FontSize="28" Margin="10,2" Grid.ColumnSpan="2" />
+        <Line X1="0" Y1="40" X2="1205" Y2="40" StrokeThickness="1" Stroke="DarkSlateGray" Grid.ColumnSpan="2"/>
+        <Grid Grid.Row="1" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="310"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="420"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Height="30" Margin="5,5">
+                    <Button Width="95" FontSize="16" Command="{Binding ReferenceButtonCommand}" Margin="0,0,0,0" ToolTip="フォルダを選択してください">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/Image/Folder_small.png" HorizontalAlignment="Center" Height="20"/>
+                            <TextBlock Text="選択" FontSize="14" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Width="95" FontSize="16" Command="{Binding ExifDeleteButtonCommand}" Margin="7.5,0,0,0" IsEnabled="{Binding ExifDeleteButtonIsEnable}" ToolTip="Exif情報を削除して保存します">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/Image/ExifCleanIcon.png" HorizontalAlignment="Center" Height="20"/>
+                            <TextBlock Text="削除" FontSize="14" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Width="95" FontSize="16" Command="{Binding GearButtonCommand}" Margin="7.5,0,0,0" ToolTip="アプリの情報を表示します">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/Image/Gear_small.png" HorizontalAlignment="Center" Height="20"/>
+                            <TextBlock Text="情報" FontSize="14" Margin="5,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                <GroupBox Grid.Row="1" BorderBrush="LightGray" BorderThickness="1.5" Header="Exif情報" FontSize="15" Margin="5,0,5,0">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" CanContentScroll="True" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="撮影日時：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.MediaDate}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="カメラ製造元：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.CameraManufacturer}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="カメラモデル：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.CameraModel}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="幅(pixel)：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.PictureWidth}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="高さ(pixel)：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.PictureHeight}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="水平方向の解像度(dpi)：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.HorizenResolution}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="垂直方向の解像度(dpi)：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.VerticalResolution}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="ビットの深さ：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.BitDepth}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="絞り値：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.Aperture, StringFormat={}{0:f1}}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="シャッタースピード(秒)：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.ShutterSpeedText}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="ISO：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.Iso}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="焦点距離(mm)：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.FocalLength}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="測光モード：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.MeteringModeText}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="ホワイトバランス：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.WhiteBlanceText}" FontSize="12"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="露出プログラム：" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.ExposeProgramText}" FontSize="12"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </GroupBox>
+                <GroupBox Grid.Row="2" BorderBrush="LightGray" BorderThickness="1.5" Header="フォルダ選択" FontSize="15" Margin="5,5,5,5">
+                    <TreeView ItemsSource="{Binding ExplorerTree}" Margin="0,5,0,0">
+                        <TreeView.Style>
+                            <Style TargetType="{x:Type TreeView}">
+                                <Setter Property="Background" Value="#F0F0F0"/>
+                                <Setter Property="BorderBrush" Value="{x:Null}"/>
+                            </Style>
+                        </TreeView.Style>
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Setter Property="FontSize" Value="13"/>
+                            </Style>
+                        </TreeView.ItemContainerStyle>
+                    </TreeView>
+                </GroupBox>
+            </Grid>
+            <Line X1="310" Y1="0" X2="310" Y2="820" StrokeThickness="1" Stroke="DarkSlateGray"/>
+            <DockPanel Grid.Column="1">
+                <StackPanel Orientation="Horizontal" Height="20" DockPanel.Dock="Top" Margin="0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="770"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="5"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="0" Margin="5,0,0,0">
+                            <TextBlock FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Left" Text="フォルダパス："/>
+                            <TextBlock FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding SelectedPicturePath}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,0,0">
+                            <Button Height="18" Width="100"  Margin="5,0,0,0" Command="{Binding OpenFileExplorerCommand}">
+                                <StackPanel Orientation="Horizontal" >
+                                    <Image Height="15" Source="/Image/Folder_open.png"/>
+                                    <TextBlock Text="フォルダを開く" VerticalAlignment="Center" Margin="5,0,0,0" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+                <Border BorderBrush="DarkGray" DockPanel.Dock="Top" BorderThickness="0,1,0,1">
+                    <ListBox x:Name="mediaListBox" ItemsSource="{Binding Path=MediaInfoList}" SelectedItem="{Binding SelectedMediaInfo}" HorizontalContentAlignment="Stretch" Margin="0,0,0,0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" VerticalContentAlignment="Top" BorderBrush="{x:Null}"
+                         ScrollViewer.CanContentScroll="False"
+                         ScrollViewer.IsDeferredScrollingEnabled="False"
+                         ScrollViewer.PanningMode="HorizontalOnly"
+                         PreviewMouseWheel="ListBox_PreviewMouseWheel"
+                         VirtualizingStackPanel.IsVirtualizing="True" 
+                         VirtualizingStackPanel.VirtualizationMode="Recycling">
+                        <ListBox.Resources>
+                            <ContextMenu x:Key="ListBoxItemMenu" ItemsSource="{Binding Path=DataContext.ContextMenuCollection, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" >
+                                <ContextMenu.ItemContainerStyle>
+                                    <Style TargetType="{x:Type MenuItem}">
+                                        <Setter Property="Header" Value="{Binding Path=DisplayName}"/>
+                                        <Setter Property="Icon" Value="{DynamicResource Icon}"/>
+                                        <EventSetter Event="Click" Handler="MenuItem_Click"/>
+                                    </Style>
+                                </ContextMenu.ItemContainerStyle>
+                            </ContextMenu>
+                            <Image x:Key="Icon" Source="{Binding Path=ContextIcon}" x:Shared="false"/>
+                        </ListBox.Resources>
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel Orientation="Horizontal" CanVerticallyScroll="True"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown"/>
+                                <EventSetter Event="PreviewGotKeyboardFocus" Handler="ListBoxItem_PreviewGotKeyboardFocus"/>
+                                <EventSetter Event="MouseDoubleClick" Handler="ListBoxItem_MouseDoubleClick"/>
+                                <Setter Property="ToolTip" Value="{Binding MediaInfoItemTooltip}"/>
+                                <Setter Property="ContextMenu" Value="{StaticResource ListBoxItemMenu}"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.Style>
+                            <Style TargetType="{x:Type ListBox}">
+                                <Setter Property="Background" Value="#F0F0F0"/>
+                                <Setter Property="Padding" Value="5" />
+                                <Setter Property="Height" Value="115" />
+                                <Setter Property="ItemTemplate">
+                                    <Setter.Value>
+                                        <DataTemplate>
+                                            <Image Width="100" Height="75" Margin="2.5,0" Source="{Binding ThumbnailImage}" />
+                                        </DataTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="ItemsPanel">
+                                    <Setter.Value>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.Style>
+                    </ListBox>
+                </Border>
+                <Image x:Name="viewImage" DockPanel.Dock="Bottom" Source="{Binding ViewImageSource}" VerticalAlignment="Center" Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" Margin="5,5,5,5"/>
+            </DockPanel>
+        </Grid>
+    </Grid>
+</Window>
