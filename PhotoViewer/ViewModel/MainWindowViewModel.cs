@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
+using System.Threading.Tasks;
 
 namespace PhotoViewer.ViewModel
 {
@@ -443,7 +444,7 @@ namespace PhotoViewer.ViewModel
             // 選択されたフォルダ内に存在するサポートされる拡張子のファイルをすべて取得
             foreach (string _supportExt in App.Current.SupportExts)
             {
-                string[] _filePaths = System.IO.Directory.GetFiles(SelectedPicturePath, "*" + _supportExt);
+                IEnumerable<string> _filePaths = Directory.EnumerateFiles(SelectedPicturePath, "*" + _supportExt, SearchOption.TopDirectoryOnly);
                 foreach (string _filePath in _filePaths)
                 {
                     // キャンセルチェック
@@ -466,7 +467,7 @@ namespace PhotoViewer.ViewModel
 
                     // 準備できたものから先に画像をリストに登録
                     var dispatcher = App.Current.Dispatcher;
-                    dispatcher.Invoke(new Action(() =>
+                    dispatcher.BeginInvoke(new Action(() =>
                     {
                         MediaInfoList.Add(_mediaInfo);
                     }));
@@ -532,7 +533,7 @@ namespace PhotoViewer.ViewModel
         /// Viewに拡大表示するImageSourceを読み込むメソッド
         /// </summary>
         /// <param name="_filePath">画像のファイルパス</param>
-        public void LoadViewImageSource(MediaInfo _info)
+        public async void LoadViewImageSource(MediaInfo _info)
         {
             // 以前に選択されたMediaと同じ場合はロードしない
             if(SelectedMediaInfo == _info)
@@ -559,6 +560,18 @@ namespace PhotoViewer.ViewModel
             SelectedMediaInfo = _info;
 
             // 画像を表示
+            await Task.Run(() => SetPictureAndExifInfo());
+
+            // SaveButtonとExifDeleteButtonの有効化
+            const bool IsEnableFlag = true;
+            SetIsEnableButton(IsEnableFlag);
+        }
+
+        /// <summary>
+        /// 静止画とExif情報をセットする
+        /// </summary>
+        private void SetPictureAndExifInfo()
+        {
             const uint _maxContentsWidth = 880;
             const uint _maxContentsHeight = 660;
             BitmapSource _openImage = ImageFileControl.OpenImageFile(SelectedMediaInfo);
@@ -567,10 +580,6 @@ namespace PhotoViewer.ViewModel
 
             // Exif情報を取得
             ExifParser.SetExifDataToMediaInfo(SelectedMediaInfo);
-
-            // SaveButtonとExifDeleteButtonの有効化
-            const bool IsEnableFlag = true;
-            SetIsEnableButton(IsEnableFlag);
         }
 
         /// <summary>

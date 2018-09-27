@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
@@ -95,13 +96,17 @@ namespace PhotoViewer
             SetForegroundWindow(hWnd);
         }
 
-        private string[] _supportExts = { ".jpg", ".bmp", ".png", ".tiff", ".gif", ".nef", ".dng" };
+        private string[] _supportExts = { ".jpg", ".bmp", ".png", ".tiff", ".tif", ".gif", ".nef", ".dng" };
+        private string[] _supportExtsHigher = { ".JPG", ".BMP", ".PNG", ".TIFF", ".TIF", ".GIF", ".NEF", ".DNG" };
         /// <summary>
         /// アプリケーションでサポートするファイルの拡張子を取得する。
         /// </summary>
         public string[] SupportExts
         {
-            get { return _supportExts; }
+            get
+            {
+                return _supportExts.Concat(_supportExtsHigher).ToArray();
+            }
         }
 
         /// <summary>
