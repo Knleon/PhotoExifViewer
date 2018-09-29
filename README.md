@@ -1,8 +1,26 @@
-﻿# PhotoExifViewer
-This app is PhotoExifViewer.
+﻿PhotoExifViewer
+====
 
-You can select a picture and see the picture and the picture's Exif Information.
+This app is PhotoExifViewer. You can watch pictures and exif information in folder.  
+This app version is "Ver1.0".
 
-Ver1.0：基本機能を組み込んだ。読み込みはスレッド処理で行う。
+## Installation
+Please download from this site and install.
 
-※お約束ですが、アプリの使用はすべて自己責任で行ってください。このアプリを使用した結果生じた損害について、開発者は一切責任を負いません。
+## Requirements
+- Windows 10 build 14393 (Anniversary Update) or later
+
+## Features
+- Seeing picture and exif information
+
+- Delete exif information in your selecting picture and save picture
+
+- Open other photo application(You need to register rinkage apps)
+
+- Setting GUI
+
+## Credits
+- Kiyotaka NAKAHAMA @kleon64 (Author, Developer)
+
+## License
+PhotoExifViewer is licensed under the MIT License.
