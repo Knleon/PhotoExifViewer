@@ -21,6 +21,3 @@ Please download from this site and install.
 
 ## Credits
 - Kiyotaka NAKAHAMA @kleon64 (Author, Developer)
-
-## License
-PhotoExifViewer is licensed under the MIT License.
