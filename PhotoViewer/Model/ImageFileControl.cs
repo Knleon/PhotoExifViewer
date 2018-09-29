@@ -42,13 +42,13 @@ namespace PhotoViewer.Model
         public static BitmapSource OpenImageFile(MediaInfo _info)
         {
             string _filePath = _info.FilePath;
-            using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
+            using (WrappingStream _stream = new WrappingStream(new MemoryStream(File.ReadAllBytes(_filePath))))
             {
                 var _frame = BitmapFrame.Create(_stream);
                 BitmapSource _openSource = new WriteableBitmap((BitmapFrame)_frame.Clone());
                 var _metaData = (_frame.Metadata) as BitmapMetadata;
 
-                if (Path.GetExtension(_filePath) == ".NEF" || Path.GetExtension(_filePath) == ".DNG")
+                if (Path.GetExtension(_filePath).ToLower() == ".nef" || Path.GetExtension(_filePath).ToLower() == ".dng")
                 {
                     return _openSource;
                 }
@@ -77,7 +77,7 @@ namespace PhotoViewer.Model
         /// </summary>
         public static BitmapSource CreateThumnailImage(string _filePath)
         {
-            using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
+            using (WrappingStream _stream = new WrappingStream(new MemoryStream(File.ReadAllBytes(_filePath))))
             {
                 // 画像オブジェクトの作成
                 var _frame = BitmapFrame.Create(_stream);
@@ -91,9 +91,9 @@ namespace PhotoViewer.Model
                 }
 
                 // Rawファイル以外はサムネイル画像を回転する
-                if (Path.GetExtension(_filePath) != ".NEF" && Path.GetExtension(_filePath) != ".DNG")
+                if (Path.GetExtension(_filePath).ToLower() != ".nef" && Path.GetExtension(_filePath).ToLower() != ".dng")
                 {
-                    _thumbnailSource = RotateBitmapSource(_metaData, _thumbnailSource); ;
+                    _thumbnailSource = RotateBitmapSource(_metaData, _thumbnailSource);
                 }
 
                 // サムネイル画像をリサイズ(100x75以上のものはこのサイズに収まるように縮小)
@@ -157,7 +157,7 @@ namespace PhotoViewer.Model
             if (sfd.ShowDialog() == true)
             {
                 string _filePath = sfd.FileName;
-                string _extension = Path.GetExtension(_filePath);
+                string _extension = Path.GetExtension(_filePath).ToLower();
                 
                 if(_extension == ".jpg")
                 {

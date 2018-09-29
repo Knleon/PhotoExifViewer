@@ -444,7 +444,7 @@ namespace PhotoViewer.ViewModel
             // 選択されたフォルダ内に存在するサポートされる拡張子のファイルをすべて取得
             foreach (string _supportExt in App.Current.SupportExts)
             {
-                IEnumerable<string> _filePaths = Directory.EnumerateFiles(SelectedPicturePath, "*" + _supportExt, SearchOption.TopDirectoryOnly);
+                IEnumerable<string> _filePaths = Directory.EnumerateFiles(SelectedPicturePath, "*" + _supportExt);
                 foreach (string _filePath in _filePaths)
                 {
                     // キャンセルチェック

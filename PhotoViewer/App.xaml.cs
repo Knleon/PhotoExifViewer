@@ -96,7 +96,6 @@ namespace PhotoViewer
             SetForegroundWindow(hWnd);
         }
 
-        private string[] _supportExts = { ".jpg", ".bmp", ".png", ".tiff", ".tif", ".gif", ".nef", ".dng" };
         private string[] _supportExtsHigher = { ".JPG", ".BMP", ".PNG", ".TIFF", ".TIF", ".GIF", ".NEF", ".DNG" };
         /// <summary>
         /// アプリケーションでサポートするファイルの拡張子を取得する。
@@ -105,7 +104,7 @@ namespace PhotoViewer
         {
             get
             {
-                return _supportExts.Concat(_supportExtsHigher).ToArray();
+                return _supportExtsHigher;
             }
         }
 
