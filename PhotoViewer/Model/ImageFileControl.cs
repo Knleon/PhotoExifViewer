@@ -42,7 +42,7 @@ namespace PhotoViewer.Model
         public static BitmapSource OpenImageFile(MediaInfo _info)
         {
             string _filePath = _info.FilePath;
-            using (WrappingStream _stream = new WrappingStream(new MemoryStream(File.ReadAllBytes(_filePath))))
+            using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
             {
                 var _frame = BitmapFrame.Create(_stream);
                 BitmapSource _openSource = new WriteableBitmap((BitmapFrame)_frame.Clone());
@@ -77,7 +77,7 @@ namespace PhotoViewer.Model
         /// </summary>
         public static BitmapSource CreateThumnailImage(string _filePath)
         {
-            using (WrappingStream _stream = new WrappingStream(new MemoryStream(File.ReadAllBytes(_filePath))))
+            using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
             {
                 // 画像オブジェクトの作成
                 var _frame = BitmapFrame.Create(_stream);

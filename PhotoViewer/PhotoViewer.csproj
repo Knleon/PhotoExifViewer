@@ -94,7 +94,6 @@
     <Compile Include="ViewModel\ExplorerTreeSourceViewModel.cs" />
     <Compile Include="Model\ImageFileControl.cs" />
     <Compile Include="Model\MediaInfo.cs" />
-    <Compile Include="Model\WrappingStream.cs" />
     <Compile Include="ViewModel\LinkageProgramViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="View\InformationView.xaml.cs">
