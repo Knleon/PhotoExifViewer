@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27703.2018
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhotoViewer", "PhotoViewer\PhotoViewer.csproj", "{7B7D8A60-5D1D-4C69-B3E6-645B3CA257F6}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PhotoExifViewerSetup", "PhotoExifViewerSetup\PhotoExifViewerSetup.vdproj", "{91E49651-A05E-40C5-AA6B-1D5E997D8AD6}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PhotoExifViewerSetup", "PhotoExifViewerSetup\PhotoExifViewerSetup.vdproj", "{87E84C35-98F0-4B44-BF37-11C9444FCDA5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,13 +23,14 @@ Global
 		{7B7D8A60-5D1D-4C69-B3E6-645B3CA257F6}.Release|x64.Build.0 = Release|x64
 		{7B7D8A60-5D1D-4C69-B3E6-645B3CA257F6}.Release|x86.ActiveCfg = Release|x86
 		{7B7D8A60-5D1D-4C69-B3E6-645B3CA257F6}.Release|x86.Build.0 = Release|x86
-		{91E49651-A05E-40C5-AA6B-1D5E997D8AD6}.Debug|x64.ActiveCfg = Debug
-		{91E49651-A05E-40C5-AA6B-1D5E997D8AD6}.Debug|x64.Build.0 = Debug
-		{91E49651-A05E-40C5-AA6B-1D5E997D8AD6}.Debug|x86.ActiveCfg = Debug
-		{91E49651-A05E-40C5-AA6B-1D5E997D8AD6}.Release|x64.ActiveCfg = Release
-		{91E49651-A05E-40C5-AA6B-1D5E997D8AD6}.Release|x64.Build.0 = Release
-		{91E49651-A05E-40C5-AA6B-1D5E997D8AD6}.Release|x86.ActiveCfg = Release
-		{91E49651-A05E-40C5-AA6B-1D5E997D8AD6}.Release|x86.Build.0 = Release
+		{87E84C35-98F0-4B44-BF37-11C9444FCDA5}.Debug|x64.ActiveCfg = Debug
+		{87E84C35-98F0-4B44-BF37-11C9444FCDA5}.Debug|x64.Build.0 = Debug
+		{87E84C35-98F0-4B44-BF37-11C9444FCDA5}.Debug|x86.ActiveCfg = Debug
+		{87E84C35-98F0-4B44-BF37-11C9444FCDA5}.Debug|x86.Build.0 = Debug
+		{87E84C35-98F0-4B44-BF37-11C9444FCDA5}.Release|x64.ActiveCfg = Release
+		{87E84C35-98F0-4B44-BF37-11C9444FCDA5}.Release|x64.Build.0 = Release
+		{87E84C35-98F0-4B44-BF37-11C9444FCDA5}.Release|x86.ActiveCfg = Release
+		{87E84C35-98F0-4B44-BF37-11C9444FCDA5}.Release|x86.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
