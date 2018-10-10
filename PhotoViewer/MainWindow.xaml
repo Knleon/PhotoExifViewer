@@ -157,11 +157,11 @@
                     </Grid>
                 </StackPanel>
                 <Border BorderBrush="DarkGray" DockPanel.Dock="Top" BorderThickness="0,1,0,1">
-                    <ListBox x:Name="mediaListBox" ItemsSource="{Binding Path=MediaInfoList}" SelectedItem="{Binding SelectedMediaInfo}" HorizontalContentAlignment="Stretch" Margin="0,0,0,0"
-                         ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" VerticalContentAlignment="Top" BorderBrush="{x:Null}"
-                         ScrollViewer.CanContentScroll="False"
-                         ScrollViewer.IsDeferredScrollingEnabled="False"
+                    <ListBox x:Name="mediaListBox" ItemsSource="{Binding Path=MediaInfoList}" SelectedItem="{Binding SelectedMediaInfo}" HorizontalContentAlignment="Stretch"
+                         ScrollViewer.HorizontalScrollBarVisibility="Visible" VerticalContentAlignment="Top" BorderBrush="{x:Null}"
+                         ScrollViewer.IsDeferredScrollingEnabled="True"
                          ScrollViewer.PanningMode="HorizontalOnly"
+                         ScrollViewer.CanContentScroll="True"
                          PreviewMouseWheel="ListBox_PreviewMouseWheel"
                          VirtualizingStackPanel.IsVirtualizing="True" 
                          VirtualizingStackPanel.VirtualizationMode="Recycling">
@@ -179,7 +179,7 @@
                         </ListBox.Resources>
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <VirtualizingStackPanel Orientation="Horizontal" CanVerticallyScroll="True"/>
+                                <VirtualizingStackPanel Orientation="Horizontal" CanHorizontallyScroll="True"/>
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                         <ListBox.ItemContainerStyle>

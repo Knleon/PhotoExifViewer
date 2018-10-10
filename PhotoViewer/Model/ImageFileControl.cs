@@ -39,23 +39,33 @@ namespace PhotoViewer.Model
         /// 画像を開くメソッド
         /// </summary>
         /// <param name="_filePath">画像ファイルのパス</param>
-        public static BitmapSource OpenImageFile(MediaInfo _info)
+        public static BitmapSource CreateViewImage(MediaInfo _info)
         {
             string _filePath = _info.FilePath;
             using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
             {
-                var _frame = BitmapFrame.Create(_stream);
-                BitmapSource _openSource = new WriteableBitmap((BitmapFrame)_frame.Clone());
-                var _metaData = (_frame.Metadata) as BitmapMetadata;
+                var _bitmapImage = new BitmapImage();
+                _bitmapImage.BeginInit();
+                _bitmapImage.StreamSource = _stream;
+                _bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                _bitmapImage.EndInit();
 
-                if (Path.GetExtension(_filePath).ToLower() == ".nef" || Path.GetExtension(_filePath).ToLower() == ".dng")
+                _stream.Position = 0;
+                var _metaData = (BitmapFrame.Create(_stream).Metadata) as BitmapMetadata;
+                _stream.Close();
+
+                BitmapSource _bitmapSource = null;
+                if (Path.GetExtension(_filePath).ToLower() != ".nef" && Path.GetExtension(_filePath).ToLower() != ".dng")
                 {
-                    return _openSource;
+                    _bitmapSource = RotateBitmapSource(_metaData, _bitmapImage);
                 }
-                else
-                {
-                    return RotateBitmapSource(_metaData, _openSource);
-                }
+
+                const uint _maxContentsWidth = 880;
+                const uint _maxContentsHeight = 660;
+                _bitmapSource = CreateResizeImage(_bitmapSource, _maxContentsWidth, _maxContentsHeight);
+
+                _bitmapSource.Freeze();
+                return _bitmapSource;
             }
         }
 
@@ -87,7 +97,7 @@ namespace PhotoViewer.Model
                 // サムネイルがない場合
                 if (_thumbnailSource == null)
                 {
-                    _thumbnailSource = new WriteableBitmap(_frame.Clone());
+                    _thumbnailSource = _frame.Clone();
                 }
 
                 // Rawファイル以外はサムネイル画像を回転する
@@ -100,11 +110,6 @@ namespace PhotoViewer.Model
                 const uint _maxContentsWidth = 100;
                 const uint _maxContentsHeight = 75;
                 _thumbnailSource = CreateResizeImage(_thumbnailSource, _maxContentsWidth, _maxContentsHeight);
-
-                // 強制メモリ解放
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
 
                 return _thumbnailSource;
             }
@@ -322,7 +327,7 @@ namespace PhotoViewer.Model
                 96, 96,                         // Default DPI Values 
                 PixelFormats.Default);          // Default pixel format
             _resizedImage.Render(_drawingVisual);
-            BitmapSource _resizeImageSource = BitmapFrame.Create(_resizedImage);
+            BitmapSource _resizeImageSource = _resizedImage;
 
             return _resizeImageSource;
         }

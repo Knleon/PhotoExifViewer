@@ -471,6 +471,11 @@ namespace PhotoViewer.ViewModel
                     {
                         MediaInfoList.Add(_mediaInfo);
                     }));
+
+                    // 強制メモリ解放
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
                 }
             }
         }
@@ -572,14 +577,18 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void SetPictureAndExifInfo()
         {
-            const uint _maxContentsWidth = 880;
-            const uint _maxContentsHeight = 660;
-            BitmapSource _openImage = ImageFileControl.OpenImageFile(SelectedMediaInfo);
-            ViewImageSource = ImageFileControl.CreateResizeImage(_openImage, _maxContentsWidth, _maxContentsHeight);
-            ViewImageSource.Freeze();
+            BitmapSource _openImage = ImageFileControl.CreateViewImage(SelectedMediaInfo);
+            _openImage.Freeze();
 
-            // Exif情報を取得
-            ExifParser.SetExifDataToMediaInfo(SelectedMediaInfo);
+            // 画像を表示
+            var dispatcher = App.Current.Dispatcher;
+            dispatcher.BeginInvoke(new Action(() =>
+            {
+                ViewImageSource = _openImage;
+
+                // Exif情報を取得
+                ExifParser.SetExifDataToMediaInfo(SelectedMediaInfo);
+            }));
         }
 
         /// <summary>
