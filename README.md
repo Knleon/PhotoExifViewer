@@ -2,8 +2,11 @@
 ====
 
 PhotoExifViewer@KLeon はKLeonオリジナルのフォトビューワーです。
+
 Exif情報と写真閲覧、Exif情報の削除などが行えます。
+
 ※ NEFファイルの閲覧機能があるため、Nikon様の「NEF Codec」のインストールが必要。
+
 https://downloadcenter.nikonimglib.com/ja/products/170/NEF_Codec.html
 
 ## アプリの動作
