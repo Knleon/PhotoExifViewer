@@ -1,23 +1,29 @@
-﻿PhotoExifViewer
+﻿PhotoExifViewer@KLeon について
 ====
 
-This app is PhotoExifViewer. You can watch pictures and exif information in folder.  
-This app version is "Ver1.0".
+PhotoExifViewer@KLeon はKLeonオリジナルのフォトビューワーです。
+Exif情報と写真閲覧、Exif情報の削除などが行えます。
+※ NEFファイルの閲覧機能があるため、Nikon様の「NEF Codec」のインストールが必要。
+https://downloadcenter.nikonimglib.com/ja/products/170/NEF_Codec.html
 
-## Installation
-Please download from this site and install.
+## アプリの動作
+Exif情報や写真の閲覧ができます。また、Exif情報の削除なども行えます。
+設定画面で設定した他のアプリを起動することも可能です。
 
-## Requirements
-- Windows 10 build 14393 (Anniversary Update) or later
+## 使用しているテクノロジ
+- Prism.Forms
+	- MVVMをするためのライブラリ
 
-## Features
-- Seeing picture and exif information
+## 機能
+- 写真閲覧
 
-- Delete exif information in your selecting picture and save picture
+- Exif情報の閲覧
 
-- Open other photo application(You need to register rinkage apps)
+- 連携アプリの起動（設定画面で設定が必要）
 
-- Setting GUI
+- Exif情報の削除
 
-## Credits
-- Kiyotaka NAKAHAMA @kleon64 (Author, Developer)
+## クレジット
+- KLeon @kleon64 (Author, Developer)
+
+This software is released under the MIT License, see LICENSE.txt.

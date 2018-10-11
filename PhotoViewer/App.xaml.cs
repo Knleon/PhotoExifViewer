@@ -96,7 +96,7 @@ namespace PhotoViewer
             SetForegroundWindow(hWnd);
         }
 
-        private string[] _supportExtsHigher = { ".JPG", ".BMP", ".PNG", ".TIFF", ".TIF", ".GIF" };
+        private string[] _supportExtsHigher = { ".JPG", ".BMP", ".PNG", ".TIFF", ".TIF", ".GIF", ".NEF", ".DNG" };
         /// <summary>
         /// アプリケーションでサポートするファイルの拡張子を取得する。
         /// </summary>

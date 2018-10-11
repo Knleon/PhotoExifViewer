@@ -570,6 +570,11 @@ namespace PhotoViewer.ViewModel
             // SaveButtonとExifDeleteButtonの有効化
             const bool IsEnableFlag = true;
             SetIsEnableButton(IsEnableFlag);
+
+            // 強制メモリ解放
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
         }
 
         /// <summary>

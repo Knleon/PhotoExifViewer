@@ -44,20 +44,28 @@ namespace PhotoViewer.Model
             string _filePath = _info.FilePath;
             using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
             {
-                var _bitmapImage = new BitmapImage();
-                _bitmapImage.BeginInit();
-                _bitmapImage.StreamSource = _stream;
-                _bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                _bitmapImage.EndInit();
-
-                _stream.Position = 0;
-                var _metaData = (BitmapFrame.Create(_stream).Metadata) as BitmapMetadata;
-                _stream.Close();
-
                 BitmapSource _bitmapSource = null;
+
+                // Not Raw image case
                 if (Path.GetExtension(_filePath).ToLower() != ".nef" && Path.GetExtension(_filePath).ToLower() != ".dng")
                 {
+                    var _bitmapImage = new BitmapImage();
+                    _bitmapImage.BeginInit();
+                    _bitmapImage.StreamSource = _stream;
+                    _bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    _bitmapImage.EndInit();
+
+                    _stream.Position = 0;
+                    var _metaData = (BitmapFrame.Create(_stream).Metadata) as BitmapMetadata;
+                    _stream.Close();
+
                     _bitmapSource = RotateBitmapSource(_metaData, _bitmapImage);
+                }
+                else
+                {
+                    // Raw Image case
+                    BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnDemand);
+                    _bitmapSource = _bmpDecoder.Frames[0];
                 }
 
                 const uint _maxContentsWidth = 880;
@@ -111,6 +119,7 @@ namespace PhotoViewer.Model
                 const uint _maxContentsHeight = 75;
                 _thumbnailSource = CreateResizeImage(_thumbnailSource, _maxContentsWidth, _maxContentsHeight);
 
+                _thumbnailSource.Freeze();
                 return _thumbnailSource;
             }
         }
@@ -304,30 +313,14 @@ namespace PhotoViewer.Model
         /// <returns>リサイズ後のBitmapImageを返す</returns>
         private static BitmapSource ResizeImage(BitmapSource _source, int _maxWidth, int _maxHeight)
         {
-            int _resizeWidth = 0;
-            int _resizeHeight = 0;
+            // 縮小率を求める
+            double _scaleX = (double)_maxWidth / _source.PixelWidth;
+            double _scaleY = (double)_maxHeight / _source.PixelHeight;
+            double _scale = Math.Min(_scaleX, _scaleY);
 
-            // アスペクト比を維持したリサイズサイズを求める
-            GetAspectScale(_source, _maxWidth, _maxHeight, ref _resizeWidth, ref _resizeHeight);
-
-            var _rect = new Rect(0, 0, _resizeWidth, _resizeHeight);
-
-            var _group = new DrawingGroup();
-            RenderOptions.SetBitmapScalingMode(_group, BitmapScalingMode.HighQuality);
-            _group.Children.Add(new ImageDrawing(_source, _rect));
-
-            var _drawingVisual = new DrawingVisual();
-            using (var _drawingContext = _drawingVisual.RenderOpen())
-            {
-                _drawingContext.DrawDrawing(_group);
-            }
-
-            var _resizedImage = new RenderTargetBitmap(
-                _resizeWidth, _resizeHeight,    // Resuzed dimensions
-                96, 96,                         // Default DPI Values 
-                PixelFormats.Default);          // Default pixel format
-            _resizedImage.Render(_drawingVisual);
-            BitmapSource _resizeImageSource = _resizedImage;
+            // 縮小されたBitmapを作成
+            BitmapSource _resizeImageSource = new WriteableBitmap(new TransformedBitmap(_source, new ScaleTransform(_scale, _scale)));
+            _resizeImageSource.Freeze();
 
             return _resizeImageSource;
         }
