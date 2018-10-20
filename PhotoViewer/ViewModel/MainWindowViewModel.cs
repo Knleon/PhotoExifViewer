@@ -153,6 +153,8 @@ namespace PhotoViewer.ViewModel
             // コンテキストメニューの表示名を設定
             const string _displayName = "メディア削除";
             _contextMenuControl.DisplayName = _displayName;
+            Uri _uri = new Uri("pack://application:,,,/Image/DeleteIcon.png");
+            _contextMenuControl.ContextIcon = BitmapFrame.Create(_uri).Clone();
 
             // コンテキストメニューのコレクションに追加
             ContextMenuCollection.Add(_contextMenuControl);
