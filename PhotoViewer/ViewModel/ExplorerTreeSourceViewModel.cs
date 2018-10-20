@@ -82,28 +82,33 @@ namespace PhotoViewer.ViewModel
             Header = CreateHeader();
         }
 
+        private void UpdateDirectoryNode()
+        {
+            Items.Clear();
+            foreach (var _dirInfo in _Directory.GetDirectories())
+            {
+                if (!IsDirectoryLocked(_dirInfo.FullName))
+                {
+                    // ファイル名の最初の文字を取得
+                    string _fileNameFirst = Path.GetFileName(_dirInfo.FullName).Substring(0, 1);
+                    const string _tempRecycleFileIndicator = "$";
+
+                    // 最初の文字が”$”だった場合、Windowsの特殊ファイルのためスキップ
+                    if (_fileNameFirst != _tempRecycleFileIndicator)
+                    {
+                        bool _isDrive = false;
+                        var _node = new ExplorerTreeSourceViewModel(_dirInfo.FullName, _isDrive);
+                        Items.Add(_node);
+                    }
+                }
+            }
+        }
+
         private void ExplorerTreeSource_Expanded(object _sender, RoutedEventArgs e)
         {
             if (!_Expanded)
             {
-                Items.Clear();
-                foreach(var _dirInfo in _Directory.GetDirectories())
-                {
-                    if (!IsDirectoryLocked(_dirInfo.FullName))
-                    {
-                        // ファイル名の最初の文字を取得
-                        string _fileNameFirst = Path.GetFileName(_dirInfo.FullName).Substring(0, 1);
-                        const string _tempRecycleFileIndicator = "$";
-                       
-                        // 最初の文字が”$”だった場合、Windowsの特殊ファイルのためスキップ
-                        if(_fileNameFirst != _tempRecycleFileIndicator)
-                        {
-                            bool _isDrive = false;
-                            var _node = new ExplorerTreeSourceViewModel(_dirInfo.FullName, _isDrive);
-                            Items.Add(_node);
-                        }
-                    }
-                }
+                UpdateDirectoryNode();
             }
             _Expanded = true;
         }
@@ -117,24 +122,7 @@ namespace PhotoViewer.ViewModel
             var _dispatcher = App.Current.Dispatcher;
             _dispatcher.BeginInvoke(new Action(() =>
             {
-                Items.Clear();
-                foreach (var _dirInfo in _Directory.GetDirectories())
-                {
-                    if (!IsDirectoryLocked(_dirInfo.FullName))
-                    {
-                        // ファイル名の最初の文字を取得
-                        string _fileNameFirst = Path.GetFileName(_dirInfo.FullName).Substring(0, 1);
-                        const string _tempRecycleFileIndicator = "$";
-
-                        // 最初の文字が”$”だった場合、Windowsの特殊ファイルのためスキップ
-                        if (_fileNameFirst != _tempRecycleFileIndicator)
-                        {
-                            bool _isDrive = false;
-                            var _node = new ExplorerTreeSourceViewModel(_dirInfo.FullName, _isDrive);
-                            Items.Add(_node);
-                        }
-                    }
-                }
+                UpdateDirectoryNode();
             }));
         }
 

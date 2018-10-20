@@ -718,14 +718,6 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// フォルダリスト更新が押されたときの動作
-        /// </summary>
-        private void FileWatcher_Changed(Object _source, FileSystemEventArgs _e)
-        {
-            UpdateExplorerTreeSource();
-        }
-
-        /// <summary>
         /// 指定されたファイルがロックされているかどうかを返します。
         /// </summary>
         /// <param name="path">検証したいファイルへのフルパス</param>
