@@ -118,7 +118,12 @@
                     </ScrollViewer>
                 </GroupBox>
                 <GroupBox Grid.Row="2" BorderBrush="LightGray" BorderThickness="1.5" Header="フォルダ選択" FontSize="15" Margin="5,5,5,5">
-                    <TreeView ItemsSource="{Binding ExplorerTree}" Margin="0,5,0,0">
+                    <GroupBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="フォルダ更新" Command="{Binding UpdateFolderListCommand}"/>
+                        </ContextMenu>
+                    </GroupBox.ContextMenu>
+                    <TreeView ItemsSource="{Binding ExplorerTree}">
                         <TreeView.Style>
                             <Style TargetType="{x:Type TreeView}">
                                 <Setter Property="Background" Value="#F0F0F0"/>
@@ -127,7 +132,7 @@
                         </TreeView.Style>
                         <TreeView.ItemContainerStyle>
                             <Style TargetType="{x:Type TreeViewItem}">
-                                <Setter Property="FontSize" Value="13"/>
+                                <Setter Property="FontSize" Value="12"/>
                             </Style>
                         </TreeView.ItemContainerStyle>
                     </TreeView>

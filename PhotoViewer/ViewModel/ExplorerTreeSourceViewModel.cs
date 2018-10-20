@@ -46,15 +46,24 @@ namespace PhotoViewer.ViewModel
 
         public ExplorerTreeSourceViewModel(string _path, bool _isDrive)
         {
+            // イベントの設定
+            Expanded += ExplorerTreeSource_Expanded;
+            Selected += ExplorerTreeSource_Selected;
+
+            // TreeViewItemのセット
+            GetTreeViewItem(_path, _isDrive);
+        }
+
+        private void GetTreeViewItem(string _path, bool _isDrive)
+        {
+            Items.Clear();
             IsDrive = _isDrive;
             _Directory = new DirectoryInfo(_path);
-            if(_Directory.GetDirectories().Count() > 0)
+            if (_Directory.GetDirectories().Count() > 0)
             {
                 Items.Add(new TreeViewItem());
-                Expanded += ExplorerTreeSource_Expanded;
             }
             Header = CreateHeader();
-            Selected += ExplorerTreeSource_Selected;
         }
 
         private void ExplorerTreeSource_Expanded(object _sender, RoutedEventArgs e)
@@ -106,9 +115,9 @@ namespace PhotoViewer.ViewModel
             _stackpanel.Children.Add(new TextBlock()
             {
                 Text = _Directory.Name,
-                Margin = new Thickness(5, 0, 0, 0)
+                Margin = new Thickness(2.5, 0, 0, 0)
             });
-            _stackpanel.Margin = new Thickness(0, 5, 0, 5);
+            _stackpanel.Margin = new Thickness(0, 5, 0, 0);
             return _stackpanel;
         }
 

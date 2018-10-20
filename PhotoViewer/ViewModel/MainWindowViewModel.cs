@@ -24,6 +24,7 @@ namespace PhotoViewer.ViewModel
         public ICommand ExifDeleteButtonCommand { get; set; }
         public ICommand GearButtonCommand { get; set; }
         public ICommand OpenFileExplorerCommand { get; set; }
+        public ICommand UpdateFolderListCommand { get; set; }
 
         #region 値のBinding
         // ViewのImageパラメータ
@@ -79,6 +80,7 @@ namespace PhotoViewer.ViewModel
             ExifDeleteButtonCommand = new DelegateCommand(ExifDeleteButtonClicked);
             GearButtonCommand = new DelegateCommand(GearButtonClicked);
             OpenFileExplorerCommand = new DelegateCommand(OpenFileExplorerButtonClicked);
+            UpdateFolderListCommand = new DelegateCommand(UpdateFolderListClicked);
         }
 
         // メディア情報の読み込みスレッド
@@ -702,13 +704,21 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// 歯車ボタンが押されたときの挙動
+        /// 歯車ボタンが押されたときの動作
         /// </summary>
         private void GearButtonClicked()
         {
             PhotoAppInfoView _infoView = new PhotoAppInfoView();
             _infoView.Owner = Application.Current.MainWindow;
             _infoView.ShowDialog();
+        }
+
+        /// <summary>
+        /// フォルダリスト更新が押されたときの動作
+        /// </summary>
+        private void UpdateFolderListClicked()
+        {
+            UpdateExplorerTreeSource();
         }
 
         /// <summary>
