@@ -24,7 +24,6 @@ namespace PhotoViewer.ViewModel
         public ICommand ExifDeleteButtonCommand { get; set; }
         public ICommand GearButtonCommand { get; set; }
         public ICommand OpenFileExplorerCommand { get; set; }
-        public ICommand UpdateFolderListCommand { get; set; }
 
         #region 値のBinding
         // ViewのImageパラメータ
@@ -80,7 +79,6 @@ namespace PhotoViewer.ViewModel
             ExifDeleteButtonCommand = new DelegateCommand(ExifDeleteButtonClicked);
             GearButtonCommand = new DelegateCommand(GearButtonClicked);
             OpenFileExplorerCommand = new DelegateCommand(OpenFileExplorerButtonClicked);
-            UpdateFolderListCommand = new DelegateCommand(UpdateFolderListClicked);
         }
 
         // メディア情報の読み込みスレッド
@@ -97,6 +95,9 @@ namespace PhotoViewer.ViewModel
         // 外部起動アプリのDictionary
         private Dictionary<string, string> ExtraAppPathDictionary { set; get; }
 
+        // メディアを読み込み中であるかどうかのフラグ
+        public bool IsReadMedia { get; set; }
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -106,6 +107,7 @@ namespace PhotoViewer.ViewModel
             SetCommand();
             PreviousFilePath = "";
             SelectedPicturePath = "";
+            IsReadMedia = false;
 
             // 情報をもつリストを定義
             MediaInfoList = new ObservableCollection<MediaInfo>();
@@ -470,8 +472,8 @@ namespace PhotoViewer.ViewModel
                     _mediaInfo.ThumbnailImage.Freeze();
 
                     // 準備できたものから先に画像をリストに登録
-                    var dispatcher = App.Current.Dispatcher;
-                    dispatcher.BeginInvoke(new Action(() =>
+                    var _dispatcher = App.Current.Dispatcher;
+                    _dispatcher.BeginInvoke(new Action(() =>
                     {
                         MediaInfoList.Add(_mediaInfo);
                     }));
@@ -569,7 +571,9 @@ namespace PhotoViewer.ViewModel
             SelectedMediaInfo = _info;
 
             // 画像を表示
+            IsReadMedia = true;
             await Task.Run(() => SetPictureAndExifInfo());
+            IsReadMedia = false;
 
             // SaveButtonとExifDeleteButtonの有効化
             const bool IsEnableFlag = true;
@@ -590,8 +594,8 @@ namespace PhotoViewer.ViewModel
             _openImage.Freeze();
 
             // 画像を表示
-            var dispatcher = App.Current.Dispatcher;
-            dispatcher.BeginInvoke(new Action(() =>
+            var _dispatcher = App.Current.Dispatcher;
+            _dispatcher.BeginInvoke(new Action(() =>
             {
                 ViewImageSource = _openImage;
 
@@ -716,7 +720,7 @@ namespace PhotoViewer.ViewModel
         /// <summary>
         /// フォルダリスト更新が押されたときの動作
         /// </summary>
-        private void UpdateFolderListClicked()
+        private void FileWatcher_Changed(Object _source, FileSystemEventArgs _e)
         {
             UpdateExplorerTreeSource();
         }

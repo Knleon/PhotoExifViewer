@@ -30,7 +30,17 @@ namespace PhotoViewer
             MediaInfo _info = _item.DataContext as MediaInfo;
 
             MainWindowViewModel _model = this.DataContext as MainWindowViewModel;
-            _model.LoadViewImageSource(_info);
+
+            // 元々の画像を読み込み中の場合
+            if (_model.IsReadMedia)
+            {
+                // 現状は何もしない
+                return;
+            }
+            else
+            {
+                _model.LoadViewImageSource(_info);
+            }
         }
 
         /// <summary>
@@ -68,7 +78,17 @@ namespace PhotoViewer
             MediaInfo _info = _item.DataContext as MediaInfo;
 
             MainWindowViewModel _model = this.DataContext as MainWindowViewModel;
-            _model.LoadViewImageSource(_info);
+
+            // 元々の画像を読み込み中の場合
+            if (_model.IsReadMedia)
+            {
+                // 現状は何もしない
+                return;
+            }
+            else
+            {
+                _model.LoadViewImageSource(_info);
+            }
         }
 
         /// <summary>

@@ -19,6 +19,7 @@ namespace PhotoViewer.ViewModel
         public DirectoryInfo _Directory { get; set; }
         private bool _Expanded { get; set; } = false;
         public bool IsDrive { get; set; } = false;
+        private System.IO.FileSystemWatcher FileWatcher = null;
 
         // ExplorerTreeの更新情報を受け取る
         public event PropertyChangedEventHandler PropertyChanged;
@@ -52,6 +53,21 @@ namespace PhotoViewer.ViewModel
 
             // TreeViewItemのセット
             GetTreeViewItem(_path, _isDrive);
+
+            // フォルダの監視を開始
+            FileWatcher = new FileSystemWatcher();
+            FileWatcher.Path = _path;
+            FileWatcher.Filter = "*";
+            FileWatcher.NotifyFilter = (NotifyFilters.FileName | NotifyFilters.DirectoryName);
+
+            // 変更があった場合は通知する
+            FileWatcher.Changed += new System.IO.FileSystemEventHandler(FileWatcher_Changed);
+            FileWatcher.Created += new System.IO.FileSystemEventHandler(FileWatcher_Changed);
+            FileWatcher.Deleted += new System.IO.FileSystemEventHandler(FileWatcher_Changed);
+            FileWatcher.Renamed += new System.IO.RenamedEventHandler(FileWatcher_Changed);
+
+            // 監視を開始
+            FileWatcher.EnableRaisingEvents = true;
         }
 
         private void GetTreeViewItem(string _path, bool _isDrive)
@@ -90,6 +106,36 @@ namespace PhotoViewer.ViewModel
                 }
             }
             _Expanded = true;
+        }
+
+        /// <summary>
+        /// FileWatcherがリスト操作を検知したとき
+        /// </summary>
+        private void FileWatcher_Changed(Object _source, System.IO.FileSystemEventArgs _e)
+        {
+            // UIスレッドで実行させる
+            var _dispatcher = App.Current.Dispatcher;
+            _dispatcher.BeginInvoke(new Action(() =>
+            {
+                Items.Clear();
+                foreach (var _dirInfo in _Directory.GetDirectories())
+                {
+                    if (!IsDirectoryLocked(_dirInfo.FullName))
+                    {
+                        // ファイル名の最初の文字を取得
+                        string _fileNameFirst = Path.GetFileName(_dirInfo.FullName).Substring(0, 1);
+                        const string _tempRecycleFileIndicator = "$";
+
+                        // 最初の文字が”$”だった場合、Windowsの特殊ファイルのためスキップ
+                        if (_fileNameFirst != _tempRecycleFileIndicator)
+                        {
+                            bool _isDrive = false;
+                            var _node = new ExplorerTreeSourceViewModel(_dirInfo.FullName, _isDrive);
+                            Items.Add(_node);
+                        }
+                    }
+                }
+            }));
         }
 
         /// <summary>
