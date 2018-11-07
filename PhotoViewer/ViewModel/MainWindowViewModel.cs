@@ -447,42 +447,61 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void LoadPictureContentsWorker(object _sender, DoWorkEventArgs _args)
         {
+            List<string> _filePathsList = new List<string>();
+
             // 選択されたフォルダ内に存在するサポートされる拡張子のファイルをすべて取得
             foreach (string _supportExt in App.Current.SupportExts)
             {
-                IEnumerable<string> _filePaths = Directory.EnumerateFiles(SelectedPicturePath, "*" + _supportExt);
+                // キャンセルチェック
+                var _worker = _sender as BackgroundWorker;
+                if (_worker.CancellationPending)
+                {
+                    _args.Cancel = true;
+                    return;
+                }
+
+                string[] _filePaths = Directory.GetFiles(SelectedPicturePath, "*" + _supportExt);
                 foreach (string _filePath in _filePaths)
                 {
-                    // キャンセルチェック
-                    var _worker = _sender as BackgroundWorker;
-                    if (_worker.CancellationPending)
-                    {
-                        _args.Cancel = true;
-                        return;
-                    }
-
-                    MediaInfo _mediaInfo = new MediaInfo();
-                    _mediaInfo.FilePath = _filePath;
-
-                    // Tooltipのファイル名を登録
-                    _mediaInfo.MediaInfoItemTooltip = ImageFileControl.GetFileName(_mediaInfo);
-
-                    // ThumbnailImageの作成
-                    _mediaInfo.ThumbnailImage = ImageFileControl.CreateThumnailImage(_mediaInfo.FilePath);
-                    _mediaInfo.ThumbnailImage.Freeze();
-
-                    // 準備できたものから先に画像をリストに登録
-                    var _dispatcher = App.Current.Dispatcher;
-                    _dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        MediaInfoList.Add(_mediaInfo);
-                    }));
-
-                    // 強制メモリ解放
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
+                    _filePathsList.Add(_filePath);
                 }
+            }
+
+            // 取得したファイルを順番に処理
+            List<MediaInfo> _queue = new List<MediaInfo>();
+            foreach(var _filePath in _filePathsList)
+            {
+                // キャンセルチェック
+                var _worker = _sender as BackgroundWorker;
+                if (_worker.CancellationPending)
+                {
+                    _args.Cancel = true;
+                    return;
+                }
+
+                MediaInfo _mediaInfo = new MediaInfo();
+                _mediaInfo.FilePath = _filePath;
+
+                // Tooltipのファイル名を登録
+                _mediaInfo.MediaInfoItemTooltip = ImageFileControl.GetFileName(_mediaInfo);
+
+                // ThumbnailImageの作成
+                _mediaInfo.ThumbnailImage = ImageFileControl.CreateThumnailImage(_mediaInfo.FilePath);
+                _mediaInfo.ThumbnailImage.Freeze();
+
+                // 準備できたものから先に画像をリストに登録
+                var _dispatcher = App.Current.Dispatcher;
+                _dispatcher.Invoke(new Action(() =>
+                {
+                    MediaInfoList.Add(_mediaInfo);
+                }));
+
+                System.Threading.Thread.Sleep(50);
+
+                // 強制メモリ解放
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
             }
         }
 
@@ -595,13 +614,15 @@ namespace PhotoViewer.ViewModel
 
             // 画像を表示
             var _dispatcher = App.Current.Dispatcher;
-            _dispatcher.BeginInvoke(new Action(() =>
+            _dispatcher.Invoke(new Action(() =>
             {
                 ViewImageSource = _openImage;
 
                 // Exif情報を取得
                 ExifParser.SetExifDataToMediaInfo(SelectedMediaInfo);
             }));
+
+            System.Threading.Thread.Sleep(50);
         }
 
         /// <summary>
