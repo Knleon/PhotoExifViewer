@@ -468,7 +468,6 @@ namespace PhotoViewer.ViewModel
             }
 
             // 取得したファイルを順番に処理
-            List<MediaInfo> _queue = new List<MediaInfo>();
             foreach(var _filePath in _filePathsList)
             {
                 // キャンセルチェック
