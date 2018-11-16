@@ -244,53 +244,54 @@ namespace PhotoViewer.ViewModel
             // 1つも登録されていないときは、全て追加
             if (ExtraAppSettingCollection.Count == 0)
             {
+                var _orderedByIdCollection = new ObservableCollection<ExtraAppSetting>();
                 foreach (var _extraAppSetting in _addExtraAppSettingCollection)
                 {
-                    // 仮のExtraAppSettingのコレクションに保存し、IDで並べ替え
-                    var _extraAppSettingCollection = new ObservableCollection<ExtraAppSetting>();
-                    _extraAppSettingCollection.Add(_extraAppSetting);
-                    var _orderedById = new ObservableCollection<ExtraAppSetting>(_extraAppSettingCollection.OrderBy(n => n.Id));
-
-                    ExtraAppSettingCollection = _orderedById;
-
-                    // ContextMenuの項目を更新
-                    UpdateContextMenuFromExtraAppSetting(ExtraAppSettingCollection);
-
-                    // Confファイルに書き出し
-                    ExtraAppSetting.Export(ExtraAppSettingCollection);
-
-                    return;
+                    // 仮のExtraAppSettingのコレクションに保存する
+                    _orderedByIdCollection.Add(_extraAppSetting);
                 }
-            }
 
-            // 1つ以上登録されているとき
-            foreach (var _extraAppSetting in _addExtraAppSettingCollection)
+                // IDで並べ替えて、表示用のExtraAppSettingCollectionに代入
+                _orderedByIdCollection = new ObservableCollection<ExtraAppSetting>(_orderedByIdCollection.OrderBy(n => n.Id));
+                ExtraAppSettingCollection = _orderedByIdCollection;
+
+                // ContextMenuの項目を更新
+                UpdateContextMenuFromExtraAppSetting(ExtraAppSettingCollection);
+
+                // Confファイルに書き出し
+                ExtraAppSetting.Export(ExtraAppSettingCollection);
+            }
+            else
             {
-                // 既存のコレクションに同じIDが含まれるか確認
-                ExtraAppSetting _containItem = ExtraAppSettingCollection.Where((i) => i.Id == _extraAppSetting.Id).SingleOrDefault();
-                if (_containItem != null)
+                // 1つ以上登録されているとき
+                foreach (var _extraAppSetting in _addExtraAppSettingCollection)
                 {
-                    // 存在する場合はPathを確認
-                    if (_containItem.Path != _extraAppSetting.Path)
+                    // 既存のコレクションに同じIDが含まれるか確認
+                    ExtraAppSetting _containItem = ExtraAppSettingCollection.Where((i) => i.Id == _extraAppSetting.Id).SingleOrDefault();
+                    if (_containItem != null)
                     {
-                        // 置き換え
-                        ExtraAppSettingCollection[_containItem.Id - 1] = _extraAppSetting;
+                        // 存在する場合はPathを確認
+                        if (_containItem.Path != _extraAppSetting.Path)
+                        {
+                            // 置き換え
+                            ExtraAppSettingCollection[_containItem.Id - 1] = _extraAppSetting;
+                        }
+                    }
+                    else
+                    {
+                        // 存在しない場合は既存のコレクションに追加してIDでソート
+                        ExtraAppSettingCollection.Add(_extraAppSetting);
+                        var _orderedById = new ObservableCollection<ExtraAppSetting>(ExtraAppSettingCollection.OrderBy(n => n.Id));
+                        ExtraAppSettingCollection = _orderedById;
                     }
                 }
-                else
-                {
-                    // 存在しない場合は既存のコレクションに追加してIDでソート
-                    ExtraAppSettingCollection.Add(_extraAppSetting);
-                    var _orderedById = new ObservableCollection<ExtraAppSetting>(ExtraAppSettingCollection.OrderBy(n => n.Id));
-                    ExtraAppSettingCollection = _orderedById;
-                }
+
+                // ContextMenuの項目を更新
+                UpdateContextMenuFromExtraAppSetting(ExtraAppSettingCollection);
+
+                // Confファイルに書き出し
+                ExtraAppSetting.Export(ExtraAppSettingCollection);
             }
-
-            // ContextMenuの項目を更新
-            UpdateContextMenuFromExtraAppSetting(ExtraAppSettingCollection);
-
-            // Confファイルに書き出し
-            ExtraAppSetting.Export(ExtraAppSettingCollection);
         }
 
         /// <summary>
