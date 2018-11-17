@@ -555,6 +555,10 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         public void UpdatePictureContentsListFromExplorer(object _sender, ExplorerEventArgs _e)
         {
+            // SaveButtonとExifDeleteButtonの無効化
+            const bool IsEnableFlag = false;
+            SetIsEnableButton(IsEnableFlag);
+
             string _folderPath = _e._directoryPath;
             ChangePictureContentsList(_folderPath);
         }
