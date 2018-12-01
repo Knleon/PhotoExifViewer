@@ -19,59 +19,71 @@ namespace PhotoViewer.ViewModel
 {
     class MainWindowViewModel:BindableBase
     {
-        // Commandを定義
-        public ICommand ReferenceButtonCommand { get; set; }
-        public ICommand ExifDeleteButtonCommand { get; set; }
-        public ICommand GearButtonCommand { get; set; }
-        public ICommand OpenFileExplorerCommand { get; set; }
-
-        #region 値のBinding
-        // ViewのImageパラメータ
+        #region 画像関係の表示のBinding値
         private BitmapSource _viewImageSource;
+        /// <summary>
+        /// メイン画像のイメージソース
+        /// </summary>
         public BitmapSource ViewImageSource
         {
             get { return _viewImageSource; }
             set { SetProperty(ref _viewImageSource, value); }
         }
 
-        // 選択されたMediaInfoのパラメータ
         private MediaInfo _selectedMediaInfo;
+        /// <summary>
+        /// 選択されたメディア情報
+        /// </summary>
         public MediaInfo SelectedMediaInfo
         {
             get { return _selectedMediaInfo; }
             set { SetProperty(ref _selectedMediaInfo, value); }
         }
 
-        // 表示中のピクチャのフォルダパス
         private string _selectedPicturePath;
+        /// <summary>
+        /// 表示中のピクチャのフォルダパス
+        /// </summary>
         public string SelectedPicturePath
         {
             get { return _selectedPicturePath; }
             set { SetProperty(ref _selectedPicturePath, value); }
         }
+        #endregion
 
-        // SaveButtonのIsEnable
+        #region UIのボタンのBinding値
         private bool _saveButtonIsEnable;
+        /// <summary>
+        /// 保存ボタンの有効・無効
+        /// </summary>
         public bool SaveButtonIsEnable
         {
             get { return _saveButtonIsEnable; }
             set { SetProperty(ref _saveButtonIsEnable, value); }
         }
 
-        // ExifDeleteButtonのIsEnable
         private bool _exifDeleteButtonIsEnable;
+        /// <summary>
+        /// Exif削除ボタンの有効・無効
+        /// </summary>
         public bool ExifDeleteButtonIsEnable
         {
             get { return _exifDeleteButtonIsEnable; }
             set { SetProperty(ref _exifDeleteButtonIsEnable, value); }
         }
+        #endregion
 
         // 以前のディレクトリ保持
         private string PreviousFilePath { get; set; }
-        #endregion
+
+        // Commandを定義
+        public ICommand ReferenceButtonCommand { get; set; }
+        public ICommand ExifDeleteButtonCommand { get; set; }
+        public ICommand GearButtonCommand { get; set; }
+        public ICommand OpenFileExplorerCommand { get; set; }
 
         /// <summary>
-        /// コマンドの設定
+        /// コマンドを設定する
         /// </summary>
         private void SetCommand()
         {
@@ -81,9 +93,17 @@ namespace PhotoViewer.ViewModel
             OpenFileExplorerCommand = new DelegateCommand(OpenFileExplorerButtonClicked);
         }
 
-        // メディア情報の読み込みスレッド
-        // 写真、Exif情報を読み込む
+        /// <summary>
+        /// メディア情報の読み込みスレッド
+        /// </summary>
+        /// <remarks>
+        /// 写真、Exif情報を読み込む
+        /// </remarks>
         private BackgroundWorker LoadPictureContentsBackgroundWorker;
+
+        /// <summary>
+        /// メディア情報の読み込みスレッドをリロードするかどうかのフラグ
+        /// </summary>
         private bool LoadPictureContentsBackgroundWorker_Reload; 
 
         // 情報を格納するリスト
@@ -92,10 +112,14 @@ namespace PhotoViewer.ViewModel
         public ObservableCollection<ContextMenuControl> ContextMenuCollection { get; set; }
         public ObservableCollection<ExtraAppSetting> ExtraAppSettingCollection { get; set; }
 
-        // 外部起動アプリのDictionary
+        /// <summary>
+        /// 外部起動アプリのDictionary
+        /// </summary>
         private Dictionary<string, string> ExtraAppPathDictionary { set; get; }
 
-        // メディアを読み込み中であるかどうかのフラグ
+        /// <summary>
+        /// メディアを読み込み中であるかどうかのフラグ
+        /// </summary>
         public bool IsReadMedia { get; set; }
 
         /// <summary>
@@ -148,7 +172,7 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// デフォルトのコンテキストメニューである「メディア削除」を設定するメソッド
+        /// デフォルトのコンテキストメニューである「メディア削除」を設定する
         /// </summary>
         private void SetupDefaultContextMenu()
         {
@@ -157,6 +181,8 @@ namespace PhotoViewer.ViewModel
             // コンテキストメニューの表示名を設定
             const string _displayName = "メディア削除";
             _contextMenuControl.DisplayName = _displayName;
+
+            // コンテキストメニューのメディア削除のアイコン画像を設定
             Uri _uri = new Uri("pack://application:,,,/Image/DeleteIcon.png");
             _contextMenuControl.ContextIcon = BitmapFrame.Create(_uri).Clone();
 
@@ -164,10 +190,10 @@ namespace PhotoViewer.ViewModel
             ContextMenuCollection.Add(_contextMenuControl);
         }
 
-        
         /// <summary>
-        /// ContextMenuの実行
+        /// ContextMenuがクリックされたとき
         /// </summary>
+        /// <param name="_item">コンテキストメニューで選択したメニュー情報</param>
         public void DoContextMenu(MenuItem _item)
         {
             string _itemHeader = Convert.ToString(_item.Header);
@@ -199,21 +225,22 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// コンテキストメニューにExtraAppSettingをセットするメソッド
+        /// コンテキストメニューに外部連携のアプリを設定する
         /// </summary>
+        /// <param name="_extraAppSettingCollection">外部連携のアプリ情報のリスト</param>
         private void UpdateContextMenuFromExtraAppSetting(ObservableCollection<ExtraAppSetting> _extraAppSettingCollection)
         {
             ExtraAppPathDictionary.Clear();
             ContextMenuCollection.Clear();
 
-            // デフォルトのコンテキストメニューであるメディア削除を生成
+            // デフォルトのコンテキストメニューであるメディア削除を設定
             SetupDefaultContextMenu();
 
             foreach (var _extraAppSetting in _extraAppSettingCollection)
             {
                 var _contextMenuControl = new ContextMenuControl();
 
-                // コンテキストメニューの表示名を設定
+                // コンテキストメニューの表示名を設定("〇〇で開く"という表記で表示)
                 string _displayName = _extraAppSetting.Name + "で開く";
                 _contextMenuControl.DisplayName = _displayName;
 
@@ -228,7 +255,7 @@ namespace PhotoViewer.ViewModel
                 // 外部起動アプリのDictionaryにDisplayNameとそれに対応したPathを登録
                 ExtraAppPathDictionary.Add(_extraAppSetting.Name, _extraAppSetting.Path);
 
-                // コンテキストメニューのコレクションに追加
+                // コンテキストメニューのリストに追加
                 ContextMenuCollection.Add(_contextMenuControl);
             }
         }
@@ -236,6 +263,7 @@ namespace PhotoViewer.ViewModel
         /// <summary>
         /// 連携アプリの設定が行われた場合のイベント処理
         /// </summary>
+        /// <param name="_e">連携したいアプリ情報を格納したイベント引数</param>
         private void UpdateLinkageContents(object _sender, LinkageEventArgs _e)
         {
             // 追加したい外部アプリ
@@ -289,7 +317,7 @@ namespace PhotoViewer.ViewModel
                 // ContextMenuの項目を更新
                 UpdateContextMenuFromExtraAppSetting(ExtraAppSettingCollection);
 
-                // Confファイルに書き出し
+                // Confファイルに外部アプリ連携の設定情報を書き出し
                 ExtraAppSetting.Export(ExtraAppSettingCollection);
             }
         }
@@ -297,6 +325,7 @@ namespace PhotoViewer.ViewModel
         /// <summary>
         /// 連携アプリの設定が削除された場合のイベント処理
         /// </summary>
+        /// <param name="_e">連携を解除するアプリ情報を格納したイベント引数</param>
         private void DeleteLinkageContents(object _sender, DeleteEventArgs _e)
         {
             // 削除するIDを確認
@@ -330,7 +359,7 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void AllDeleteLinkageContents(object _sender, EventArgs _e)
         {
-            // すべての項目をリセット
+            // すべての項目をリセット(外部連携のアプリ情報のリスト、外部連携のアプリパス情報の辞書、コンテキストメニュー)
             ExtraAppSettingCollection.Clear();
             ExtraAppPathDictionary.Clear();
             ContextMenuCollection.Clear();
@@ -340,13 +369,15 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// エクスプローラのツリーを更新するメソッド
+        /// エクスプローラのツリーを更新する
         /// </summary>
         private void UpdateExplorerTreeSource()
         {
             ExplorerTree.Clear();
 
+            // PCに接続されているドライブ情報をすべて取得
             DriveInfo[] _allDrives = DriveInfo.GetDrives();
+
             foreach(var _drive in _allDrives)
             {
                 if(_drive.IsReady == true)
@@ -360,12 +391,14 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// ピクチャコンテンツリストを更新するメソッド
+        /// ピクチャコンテンツリストを更新する
         /// </summary>
+        /// <param name="_folder">選択されたフォルダパス</param>
         private void ChangePictureContentsList(string _folder)
         {
             if (_folder == SelectedPicturePath)
             {
+                // 選択されたフォルダパスが以前のフォルダパスと同じ場合は何もしない
                 return;
             }
 
@@ -535,7 +568,7 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// 参照ボタンを押したときの挙動
+        /// 参照ボタンを押したときの動作
         /// </summary>
         private void ReferenceButtonClicked()
         {
@@ -566,7 +599,7 @@ namespace PhotoViewer.ViewModel
         /// <summary>
         /// Viewに拡大表示するImageSourceを読み込むメソッド
         /// </summary>
-        /// <param name="_filePath">画像のファイルパス</param>
+        /// <param name="_info">拡大表示するメディア情報</param>
         public async void LoadViewImageSource(MediaInfo _info)
         {
             // 以前に選択されたMediaと同じ場合はロードしない
@@ -609,7 +642,7 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// 静止画とExif情報をセットする
+        /// 静止画とExif情報を設定する
         /// </summary>
         private void SetPictureAndExifInfo()
         {
@@ -630,8 +663,9 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// MediaInfoListの画像をダブルクリックしたときの挙動
+        /// MediaInfoListの画像をダブルクリックしたときの動作
         /// </summary>
+        /// <param name="_info">選択したメディア情報</param>
         public void MediaInfoListDoubleClicked(MediaInfo _info)
         {
             // TODO ファイルを別アプリで開くことを検討中
@@ -639,7 +673,7 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// フォルダを開くボタンをクリックしたときの挙動
+        /// フォルダを開くボタンをクリックしたときの動作
         /// </summary>
         private void OpenFileExplorerButtonClicked()
         {
@@ -647,7 +681,7 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// ListBoxItemの右クリックでメディア削除が押されたときの挙動
+        /// ListBoxItemの右クリックでメディア削除が押されたときの動作
         /// </summary>
         private void DeleteMediaFromFolderClicked()
         {
@@ -694,7 +728,7 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// Exif削除ボタンが押されたときの挙動
+        /// Exif削除ボタンが押されたときの動作
         /// </summary>
         private void ExifDeleteButtonClicked()
         {
@@ -725,7 +759,7 @@ namespace PhotoViewer.ViewModel
         /// <summary>
         /// SaveButtonとExifDeleteButtonのフラグ設定メソッド
         /// </summary>
-        /// <param name="_flag">IsEnableのフラグ</param>
+        /// <param name="_flag">ボタンのフラグ設定</param>
         private void SetIsEnableButton(bool _flag)
         {
             SaveButtonIsEnable = _flag;

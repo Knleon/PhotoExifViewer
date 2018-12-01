@@ -160,7 +160,7 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private BitmapSource CreateIconBitmapSource(bool _isDrive)
         {
-            if (_isDrive == true)
+            if (_isDrive)
             {
                 BitmapSource _iconImage = WindowsIconCreator.GetWindowsIcon(WindowsIconCreator.StockIconId.SIID_DRIVEFIXED);
                 return _iconImage;
