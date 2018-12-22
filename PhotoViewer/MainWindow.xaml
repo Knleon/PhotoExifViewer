@@ -4,10 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        ResizeMode="CanMinimize"
+        ResizeMode="CanResize"
         Icon="/Image/PhotoExifViewerIcon.ico"
         WindowStartupLocation="CenterScreen"
-        Title="Photo Exif Viewer" Height="890" Width="1205"
+        Title="Photo Exif Viewer" Height ="890" Width="1205" MinHeight="890" MinWidth="1205"
         Closing="Window_Closing">
     <Window.Background>
         <SolidColorBrush Color="#F0F0F0"/>
@@ -19,11 +19,11 @@
         </Grid.RowDefinitions>
         <Rectangle Grid.Row="0" Fill="SkyBlue" Grid.ColumnSpan="2"/>
         <TextBlock Grid.Row="0" Text="Photo Exif Viewer" FontSize="28" Margin="10,2" Grid.ColumnSpan="2" />
-        <Line X1="0" Y1="40" X2="1205" Y2="40" StrokeThickness="1" Stroke="DarkSlateGray" Grid.ColumnSpan="2"/>
+        <Line X1="0" Y1="40" X2="10000" Y2="40" StrokeThickness="1" Stroke="DarkSlateGray" Grid.ColumnSpan="2"/>
         <Grid Grid.Row="1" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="310"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.25*"/>
+                <ColumnDefinition Width="0.75*"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
@@ -31,26 +31,31 @@
                     <RowDefinition Height="420"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Height="30" Margin="5,5">
-                    <Button Width="95" FontSize="16" Command="{Binding ReferenceButtonCommand}" Margin="0,0,0,0" ToolTip="フォルダを選択してください">
+                <Grid Grid.Row="0" Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Margin="2.5,0,2.5,0" FontSize="16" Command="{Binding ReferenceButtonCommand}" ToolTip="フォルダを選択してください">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Image/Folder_small.png" HorizontalAlignment="Center" Height="20"/>
                             <TextBlock Text="選択" FontSize="14" Margin="5,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                    <Button Width="95" FontSize="16" Command="{Binding ExifDeleteButtonCommand}" Margin="7.5,0,0,0" IsEnabled="{Binding ExifDeleteButtonIsEnable}" ToolTip="Exif情報を削除して保存します">
+                    <Button Grid.Column="1" Margin="2.5,0,2.5,0" FontSize="16" Command="{Binding ExifDeleteButtonCommand}" IsEnabled="{Binding ExifDeleteButtonIsEnable}" ToolTip="Exif情報を削除して保存します">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Image/ExifCleanIcon.png" HorizontalAlignment="Center" Height="20"/>
                             <TextBlock Text="削除" FontSize="14" Margin="5,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                    <Button Width="95" FontSize="16" Command="{Binding GearButtonCommand}" Margin="7.5,0,0,0" ToolTip="アプリの情報を表示します">
+                    <Button Grid.Column="2" Margin="2.5,0,2.5,0" FontSize="16" Command="{Binding GearButtonCommand}" ToolTip="アプリの情報を表示します">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Image/Gear_small.png" HorizontalAlignment="Center" Height="20"/>
                             <TextBlock Text="情報" FontSize="14" Margin="5,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                </StackPanel>
+                </Grid>
                 <GroupBox Grid.Row="1" BorderBrush="LightGray" BorderThickness="1.5" Header="Exif情報" FontSize="15" Margin="5,0,5,0">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" CanContentScroll="True" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
                         <StackPanel Orientation="Vertical">
@@ -133,30 +138,30 @@
                     </TreeView>
                 </GroupBox>
             </Grid>
-            <Line X1="310" Y1="0" X2="310" Y2="820" StrokeThickness="1" Stroke="DarkSlateGray"/>
-            <DockPanel Grid.Column="1">
-                <StackPanel Orientation="Horizontal" Height="20" DockPanel.Dock="Top" Margin="0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="770"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="5"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="0" Margin="5,0,0,0">
-                            <TextBlock FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Left" Text="フォルダパス："/>
-                            <TextBlock FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding SelectedPicturePath}"/>
+            <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="0 0 1 0"/>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="115"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.85*"/>
+                        <ColumnDefinition Width="0.15*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0,0,0">
+                        <TextBlock FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Left" Text="フォルダパス："/>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding SelectedPicturePath}"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" MinWidth="100" Margin="0,1,5,1" Command="{Binding OpenFileExplorerCommand}" HorizontalAlignment="Right">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Height="15" Source="/Image/Folder_open.png"/>
+                            <TextBlock Text="フォルダを開く" VerticalAlignment="Center" Margin="5,0,0,0"/>
                         </StackPanel>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,0,0">
-                            <Button Height="18" Width="100"  Margin="5,0,0,0" Command="{Binding OpenFileExplorerCommand}">
-                                <StackPanel Orientation="Horizontal" >
-                                    <Image Height="15" Source="/Image/Folder_open.png"/>
-                                    <TextBlock Text="フォルダを開く" VerticalAlignment="Center" Margin="5,0,0,0" />
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-                <Border BorderBrush="DarkGray" DockPanel.Dock="Top" BorderThickness="0,1,0,1">
+                    </Button>
+                </Grid>
+                <Border Grid.Row="1" BorderBrush="DarkGray" BorderThickness="0,1,0,1">
                     <ListBox x:Name="mediaListBox" ItemsSource="{Binding Path=MediaInfoList}" SelectedItem="{Binding SelectedMediaInfo}" HorizontalContentAlignment="Stretch"
                          ScrollViewer.HorizontalScrollBarVisibility="Visible" VerticalContentAlignment="Top" BorderBrush="{x:Null}"
                          ScrollViewer.IsDeferredScrollingEnabled="True"
@@ -214,8 +219,8 @@
                         </ListBox.Style>
                     </ListBox>
                 </Border>
-                <Image x:Name="viewImage" DockPanel.Dock="Bottom" Source="{Binding ViewImageSource}" VerticalAlignment="Center" Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" Margin="5,5,5,5"/>
-            </DockPanel>
+                <Image Grid.Row="2" x:Name="viewImage" Source="{Binding ViewImageSource}" VerticalAlignment="Center" Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" Margin="5,5,5,5"/>
+            </Grid>
         </Grid>
     </Grid>
 </Window>
