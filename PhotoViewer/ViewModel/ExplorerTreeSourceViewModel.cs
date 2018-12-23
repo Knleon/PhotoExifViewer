@@ -21,7 +21,9 @@ namespace PhotoViewer.ViewModel
         public bool IsDrive { get; set; } = false;
         private System.IO.FileSystemWatcher FileWatcher = null;
 
-        // ExplorerTreeの更新情報を受け取る
+        /// <summary>
+        /// ExplorerTreeの更新情報を受け取るイベント
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
         private ExplorerTreeSourceViewModel _selectionItem;
         public ExplorerTreeSourceViewModel SelectionItem
@@ -34,7 +36,9 @@ namespace PhotoViewer.ViewModel
             }
         }
 
-
+        /// <summary>
+        /// エクスプローライベント
+        /// </summary>
         public delegate void ExplorerEventHandler(object _sender, ExplorerEventArgs e);
         public event ExplorerEventHandler ExplorerEvent;
         protected virtual void OnExplorerEvent(ExplorerEventArgs e)
@@ -45,6 +49,11 @@ namespace PhotoViewer.ViewModel
             }
         }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="_path"></param>
+        /// <param name="_isDrive"></param>
         public ExplorerTreeSourceViewModel(string _path, bool _isDrive)
         {
             // イベントの設定
@@ -70,6 +79,11 @@ namespace PhotoViewer.ViewModel
             FileWatcher.EnableRaisingEvents = true;
         }
 
+        /// <summary>
+        /// フォルダ内の情報を取得する
+        /// </summary>
+        /// <param name="_path">ファイルパス or フォルダパス</param>
+        /// <param name="_isDrive">ドライブ直下であるかどうか</param>
         private void GetTreeViewItem(string _path, bool _isDrive)
         {
             Items.Clear();
@@ -82,6 +96,9 @@ namespace PhotoViewer.ViewModel
             Header = CreateHeader();
         }
 
+        /// <summary>
+        /// ディレクトリ内の情報を更新する
+        /// </summary>
         private void UpdateDirectoryNode()
         {
             Items.Clear();
@@ -104,6 +121,11 @@ namespace PhotoViewer.ViewModel
             }
         }
 
+        /// <summary>
+        /// エクスプローラ内でフォルダをクリックして展開したときのイベント
+        /// </summary>
+        /// <param name="_sender">Object</param>
+        /// <param name="e">引数情報</param>
         private void ExplorerTreeSource_Expanded(object _sender, RoutedEventArgs e)
         {
             if (!_Expanded)

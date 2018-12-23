@@ -22,9 +22,13 @@ namespace PhotoViewer.ViewModel
     class LinkageProgramViewModel : BindableBase
     {
         #region LinkageProgramProperty
+        // 連携アプリ選択ダイアログのテキスト
         private readonly string FolderDialogTitle = "連携アプリ選択ダイアログ";
 
         private string _linkAppPath1;
+        /// <summary>
+        /// 連携アプリ１の情報
+        /// </summary>
         public string LinkAppPath1
         {
             get { return _linkAppPath1; }
@@ -32,6 +36,9 @@ namespace PhotoViewer.ViewModel
         }
 
         private string _linkAppPath2;
+        /// <summary>
+        /// 連携アプリ２の情報
+        /// </summary>
         public string LinkAppPath2
         {
             get { return _linkAppPath2; }
@@ -39,6 +46,9 @@ namespace PhotoViewer.ViewModel
         }
 
         private string _linkAppPath3;
+        /// <summary>
+        /// 連携アプリ３の情報
+        /// </summary>
         public string LinkAppPath3
         {
             get { return _linkAppPath3; }

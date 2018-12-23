@@ -8,11 +8,11 @@ using System.Windows;
 // アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
 [assembly: AssemblyTitle("Photo Exif Viewer")]
-[assembly: AssemblyDescription("Photo Exif Viewer Ver1.00")]
+[assembly: AssemblyDescription("Photo Exif Viewer Ver1.10")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Kiyotaka NAKAHAMA")]
+[assembly: AssemblyCompany("KLeon")]
 [assembly: AssemblyProduct("Photo Exif Viewer")]
-[assembly: AssemblyCopyright("Copyright ©  2018 Kiyotaka NAKAHAMA All Rights Reserved.")]
+[assembly: AssemblyCopyright("Copyright ©  2018 KLeon All Rights Reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +51,5 @@ using System.Windows;
 // すべての値を指定するか、次を使用してビルド番号とリビジョン番号を既定に設定できます
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]

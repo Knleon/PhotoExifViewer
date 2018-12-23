@@ -19,7 +19,7 @@ namespace PhotoViewer.ViewModel
 {
     class MainWindowViewModel:BindableBase
     {
-        #region 画像関係の表示のBinding値
+        #region Image Binding Parameter
         private BitmapSource _viewImageSource;
         /// <summary>
         /// メイン画像のイメージソース
@@ -51,7 +51,7 @@ namespace PhotoViewer.ViewModel
         }
         #endregion
 
-        #region UIのボタンのBinding値
+        #region UI Binding Parameter
         private bool _saveButtonIsEnable;
         /// <summary>
         /// 保存ボタンの有効・無効
@@ -72,9 +72,6 @@ namespace PhotoViewer.ViewModel
             set { SetProperty(ref _exifDeleteButtonIsEnable, value); }
         }
         #endregion
-
-        // 以前のディレクトリ保持
-        private string PreviousFilePath { get; set; }
 
         // Commandを定義
         public ICommand ReferenceButtonCommand { get; set; }
@@ -116,6 +113,11 @@ namespace PhotoViewer.ViewModel
         /// 外部起動アプリのDictionary
         /// </summary>
         private Dictionary<string, string> ExtraAppPathDictionary { set; get; }
+
+        /// <summary>
+        /// 以前のディレクトリ保持
+        /// </summary>
+        private string PreviousFilePath { get; set; }
 
         /// <summary>
         /// メディアを読み込み中であるかどうかのフラグ
@@ -513,7 +515,10 @@ namespace PhotoViewer.ViewModel
                 }
 
                 MediaInfo _mediaInfo = new MediaInfo();
+
+                // ファイルパスとファイル名を設定
                 _mediaInfo.FilePath = _filePath;
+                _mediaInfo.FileName = Path.GetFileName(_filePath);
 
                 // Tooltipのファイル名を登録
                 _mediaInfo.MediaInfoItemTooltip = ImageFileControl.GetFileName(_mediaInfo);

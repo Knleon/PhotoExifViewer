@@ -10,6 +10,9 @@ namespace PhotoViewer.Model
     {
         #region ExtraAppSettingProperty
         private int _id;
+        /// <summary>
+        /// 管理ID
+        /// </summary>
         public int Id
         {
             get { return _id; }
@@ -17,6 +20,9 @@ namespace PhotoViewer.Model
         }
 
         private string _name;
+        /// <summary>
+        /// 連携アプリ名
+        /// </summary>
         public string Name
         {
             get { return _name; }
@@ -24,17 +30,20 @@ namespace PhotoViewer.Model
         }
 
         private string _path;
+        /// <summary>
+        /// 連携アプリの実行ファイルのパス
+        /// </summary>
         public string Path
         {
             get { return _path; }
             set { SetProperty(ref _path, value); }
         }
-
-        public ExtraAppSetting()
-        {
-
-        }
         #endregion
+        
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public ExtraAppSetting(){}
 
         /// <summary>
         /// XMLファイルを生成し、ConfファイルをExportするメソッド

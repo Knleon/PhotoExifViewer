@@ -59,11 +59,11 @@ namespace PhotoViewer
 
             if (e.Delta > 0)
             {
-                _viewer.LineLeft();
+                _viewer.LineUp();
             }
             else
             {
-                _viewer.LineRight();
+                _viewer.LineDown();
             }
 
             e.Handled = true;

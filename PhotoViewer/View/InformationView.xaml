@@ -12,8 +12,8 @@
     <Grid>
         <StackPanel Orientation="Vertical"  HorizontalAlignment="Center" VerticalAlignment="Center">
             <TextBlock FontSize="32" Text="PhotoViewer" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-            <TextBlock FontSize="20" Text="バージョン：Ver1.0" Margin="0,0,0,5"/>
-            <TextBlock FontSize="20" Text="開発者：K.Nakahama" Margin="0,0,0,5"/>
+            <TextBlock FontSize="20" Text="バージョン：Ver1.1" Margin="0,0,0,5"/>
+            <TextBlock FontSize="20" Text="開発者：KLeon" Margin="0,0,0,5"/>
         </StackPanel>
     </Grid>
 </Page>

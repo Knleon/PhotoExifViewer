@@ -5,16 +5,20 @@ namespace PhotoViewer.Model
 {
     public class ContextMenuControl:BindableBase
     {
-        // ContextMenuのHeader
         private string _displayName;
+        /// <summary>
+        /// コンテキストメニューに表示するアプリ名
+        /// </summary>
         public string DisplayName
         {
             get { return _displayName; }
             set { SetProperty(ref _displayName, value); }
         }
 
-        // ContextMenuのIcon
         private BitmapSource _contextIcon;
+        /// <summary>
+        /// コンテキストメニューのアイコン情報
+        /// </summary>
         public BitmapSource ContextIcon
         {
             get { return _contextIcon; }
@@ -22,9 +26,6 @@ namespace PhotoViewer.Model
         }
 
         // コンストラクタ
-        public ContextMenuControl()
-        {
-
-        }
+        public ContextMenuControl(){}
     }
 }

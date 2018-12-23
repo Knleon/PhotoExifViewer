@@ -7,7 +7,7 @@
         ResizeMode="CanResize"
         Icon="/Image/PhotoExifViewerIcon.ico"
         WindowStartupLocation="CenterScreen"
-        Title="Photo Exif Viewer" Height ="890" Width="1205" MinHeight="890" MinWidth="1205"
+        Title="Photo Exif Viewer" Height ="890" Width="1205" MinHeight="890" MinWidth="1220"
         Closing="Window_Closing">
     <Window.Background>
         <SolidColorBrush Color="#F0F0F0"/>
@@ -142,8 +142,8 @@
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"/>
-                    <RowDefinition Height="115"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="660"/>
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
@@ -163,9 +163,10 @@
                 </Grid>
                 <Border Grid.Row="1" BorderBrush="DarkGray" BorderThickness="0,1,0,1">
                     <ListBox x:Name="mediaListBox" ItemsSource="{Binding Path=MediaInfoList}" SelectedItem="{Binding SelectedMediaInfo}" HorizontalContentAlignment="Stretch"
-                         ScrollViewer.HorizontalScrollBarVisibility="Visible" VerticalContentAlignment="Top" BorderBrush="{x:Null}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Visible" VerticalContentAlignment="Top" BorderBrush="{x:Null}"
                          ScrollViewer.IsDeferredScrollingEnabled="True"
-                         ScrollViewer.PanningMode="HorizontalOnly"
+                         ScrollViewer.PanningMode="VerticalOnly"
                          ScrollViewer.CanContentScroll="True"
                          PreviewMouseWheel="ListBox_PreviewMouseWheel"
                          VirtualizingStackPanel.IsVirtualizing="True" 
@@ -184,7 +185,7 @@
                         </ListBox.Resources>
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <VirtualizingStackPanel Orientation="Horizontal" CanHorizontallyScroll="True"/>
+                                <WrapPanel/>
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                         <ListBox.ItemContainerStyle>
@@ -199,20 +200,18 @@
                         <ListBox.Style>
                             <Style TargetType="{x:Type ListBox}">
                                 <Setter Property="Background" Value="#F0F0F0"/>
-                                <Setter Property="Padding" Value="5" />
-                                <Setter Property="Height" Value="115" />
                                 <Setter Property="ItemTemplate">
                                     <Setter.Value>
                                         <DataTemplate>
-                                            <Image Width="100" Height="75" Margin="2.5,0" Source="{Binding ThumbnailImage}" />
+                                            <Grid Width="100" Height="95">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="75"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <Image Grid.Row="0" Source="{Binding ThumbnailImage}"/>
+                                                <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="{Binding FileName}" TextTrimming="CharacterEllipsis"/>
+                                            </Grid>
                                         </DataTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Setter Property="ItemsPanel">
-                                    <Setter.Value>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" />
-                                        </ItemsPanelTemplate>
                                     </Setter.Value>
                                 </Setter>
                             </Style>
