@@ -147,10 +147,7 @@ namespace PhotoViewer.Model
             SIID_CLUSTEREDDRIVE = 140,
         }
 
-        public WindowsIconCreator()
-        {
-
-        }
+        public WindowsIconCreator(){ }
 
         /// <summary>
         /// Windows標準のアイコンを取得するメソッド

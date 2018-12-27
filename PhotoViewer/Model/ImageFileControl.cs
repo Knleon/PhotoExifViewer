@@ -20,13 +20,17 @@ namespace PhotoViewer.Model
         static public string OpenDirectory()
         {
             string _selectedFolderPath = "";
+
             var dialog = new CommonOpenFileDialog();
+
+            // フォルダ選択ダイアログの設定
             dialog.Title = FolderDialogTitle;
             dialog.EnsureReadOnly = false;
             dialog.AllowNonFileSystemItems = false;
             dialog.IsFolderPicker = true;
             dialog.DefaultDirectory = Environment.GetFolderPath(System.Environment.SpecialFolder.CommonPictures);
 
+            // フォルダ選択ダイアログの表示
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 _selectedFolderPath = dialog.FileName;

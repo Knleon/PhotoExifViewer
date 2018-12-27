@@ -6,6 +6,9 @@ namespace PhotoViewer.Model
 {
     public static class ExifParser
     {
+        /// <summary>
+        /// Exifタグをまとめた列挙型
+        /// </summary>
         public enum Property_Tag
         {
             MEDIA_DATE = 12,
@@ -48,9 +51,10 @@ namespace PhotoViewer.Model
         /// </summary>
         public static void SetExifDataToMediaInfo(MediaInfo _info)
         {
+            // ファイルパスをセット
             string _filePath = _info.FilePath;
             
-            // タグにより場合分け
+            // Exifタグにより場合分け
             foreach(Property_Tag _tag in Enum.GetValues(typeof(Property_Tag)))
             {
                 string _propertyText = GetFileProperty(_filePath, _tag);
