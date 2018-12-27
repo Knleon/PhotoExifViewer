@@ -131,7 +131,7 @@ namespace PhotoViewer
             var _menuItem = sender as MenuItem;
 
             MainWindowViewModel _model = this.DataContext as MainWindowViewModel;
-            _model.DoContextMenu(_menuItem);
+            _model.ExecuteContextMenu(_menuItem);
         }
 
         /// <summary>

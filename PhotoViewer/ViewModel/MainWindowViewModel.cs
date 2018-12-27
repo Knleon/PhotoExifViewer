@@ -129,11 +129,13 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         public MainWindowViewModel()
         {
-            // Viewのコマンドと変数の初期値を設定
-            SetCommand();
+            // 変数の初期値を設定
             PreviousFilePath = "";
             SelectedPicturePath = "";
             IsReadMedia = false;
+
+            // コマンドを設定
+            SetCommand();
 
             // 情報をもつリストを定義
             MediaInfoList = new ObservableCollection<MediaInfo>();
@@ -149,54 +151,26 @@ namespace PhotoViewer.ViewModel
 
             // デフォルトのコンテキストメニューの「メディア削除」を追加
             // ExtraAppSettingCollectionが取得できている場合は、それも追加
-            if (ExtraAppSettingCollection.Count == 0)
-            {
-                SetupDefaultContextMenu();
-            }
-            else
-            {
-                UpdateContextMenuFromExtraAppSetting(ExtraAppSettingCollection);
-            }
+            UpdateContextMenuFromExtraAppSetting(ExtraAppSettingCollection);
 
-            // 連携アプリ設定からのEvent設定
+            // 連携アプリ設定g画面からのEvent設定
             LinkageProgramViewModel.LinkageEvent += UpdateLinkageContents;
             LinkageProgramViewModel.DeleteAppEvent += DeleteLinkageContents;
             LinkageProgramViewModel.AllDeleteEvent += AllDeleteLinkageContents;
 
-            // デフォルトパスのリストを取得
-            string _defaultPicturePath = Environment.GetFolderPath(System.Environment.SpecialFolder.CommonPictures);
-
             // エクスプローラのツリーをデフォルト状態で更新
             UpdateExplorerTreeSource();
 
-            // 別スレッドでピクチャコンテンツの更新
+            // 別スレッドでピクチャコンテンツの更新(デフォルトパスはPublicユーザーのピクチャーフォルダ)
+            string _defaultPicturePath = Environment.GetFolderPath(System.Environment.SpecialFolder.CommonPictures);
             ChangePictureContentsList(_defaultPicturePath);
-        }
-
-        /// <summary>
-        /// デフォルトのコンテキストメニューである「メディア削除」を設定する
-        /// </summary>
-        private void SetupDefaultContextMenu()
-        {
-            var _contextMenuControl = new ContextMenuControl();
-
-            // コンテキストメニューの表示名を設定
-            const string _displayName = "メディア削除";
-            _contextMenuControl.DisplayName = _displayName;
-
-            // コンテキストメニューのメディア削除のアイコン画像を設定
-            Uri _uri = new Uri("pack://application:,,,/Image/DeleteIcon.png");
-            _contextMenuControl.ContextIcon = BitmapFrame.Create(_uri).Clone();
-
-            // コンテキストメニューのコレクションに追加
-            ContextMenuCollection.Add(_contextMenuControl);
         }
 
         /// <summary>
         /// ContextMenuがクリックされたとき
         /// </summary>
         /// <param name="_item">コンテキストメニューで選択したメニュー情報</param>
-        public void DoContextMenu(MenuItem _item)
+        public void ExecuteContextMenu(MenuItem _item)
         {
             string _itemHeader = Convert.ToString(_item.Header);
             foreach (var _contextCollection in ContextMenuCollection)
@@ -215,7 +189,10 @@ namespace PhotoViewer.ViewModel
                     {
                         string _appName = _itemHeader.Replace("で開く", "");
                         string _appPath = ExtraAppPathDictionary[_appName];
+
+                        // 外部連携アプリを起動する
                         System.Diagnostics.Process.Start(_appPath, SelectedMediaInfo.FilePath);
+
                         return;
                     }
                 }
@@ -229,6 +206,7 @@ namespace PhotoViewer.ViewModel
         /// <summary>
         /// コンテキストメニューに外部連携のアプリを設定する
         /// </summary>
+        /// <remarks>デフォルトの"メディア削除"も追加する</remarks>
         /// <param name="_extraAppSettingCollection">外部連携のアプリ情報のリスト</param>
         private void UpdateContextMenuFromExtraAppSetting(ObservableCollection<ExtraAppSetting> _extraAppSettingCollection)
         {
@@ -236,29 +214,46 @@ namespace PhotoViewer.ViewModel
             ContextMenuCollection.Clear();
 
             // デフォルトのコンテキストメニューであるメディア削除を設定
-            SetupDefaultContextMenu();
-
-            foreach (var _extraAppSetting in _extraAppSettingCollection)
             {
                 var _contextMenuControl = new ContextMenuControl();
 
-                // コンテキストメニューの表示名を設定("〇〇で開く"という表記で表示)
-                string _displayName = _extraAppSetting.Name + "で開く";
+                // コンテキストメニューの表示名を設定
+                const string _displayName = "メディア削除";
                 _contextMenuControl.DisplayName = _displayName;
 
-                // アイコン画像を読み込み
-                Icon _appIcon = Icon.ExtractAssociatedIcon(_extraAppSetting.Path);
-                using (MemoryStream _iconStream = new MemoryStream())
-                {
-                    _appIcon.Save(_iconStream);
-                    _contextMenuControl.ContextIcon = BitmapFrame.Create(_iconStream).Clone();
-                }
+                // コンテキストメニューのメディア削除のアイコン画像を設定
+                Uri _uri = new Uri("pack://application:,,,/Image/DeleteIcon.png");
+                _contextMenuControl.ContextIcon = BitmapFrame.Create(_uri).Clone();
 
-                // 外部起動アプリのDictionaryにDisplayNameとそれに対応したPathを登録
-                ExtraAppPathDictionary.Add(_extraAppSetting.Name, _extraAppSetting.Path);
-
-                // コンテキストメニューのリストに追加
+                // コンテキストメニューのコレクションに追加
                 ContextMenuCollection.Add(_contextMenuControl);
+            }
+
+            // 外部連携アプリ設定が行われていて、すでに登録されている場合は1件以上あるはず
+            if (_extraAppSettingCollection.Count > 0)
+            {
+                foreach (var _extraAppSetting in _extraAppSettingCollection)
+                {
+                    var _contextMenuControl = new ContextMenuControl();
+
+                    // コンテキストメニューの表示名を設定("〇〇で開く"という表記で表示)
+                    string _displayName = _extraAppSetting.Name + "で開く";
+                    _contextMenuControl.DisplayName = _displayName;
+
+                    // アイコン画像を読み込み
+                    Icon _appIcon = Icon.ExtractAssociatedIcon(_extraAppSetting.Path);
+                    using (MemoryStream _iconStream = new MemoryStream())
+                    {
+                        _appIcon.Save(_iconStream);
+                        _contextMenuControl.ContextIcon = BitmapFrame.Create(_iconStream).Clone();
+                    }
+
+                    // 外部起動アプリのDictionaryにDisplayNameとそれに対応したPathを登録
+                    ExtraAppPathDictionary.Add(_extraAppSetting.Name, _extraAppSetting.Path);
+
+                    // コンテキストメニューのリストに追加
+                    ContextMenuCollection.Add(_contextMenuControl);
+                }
             }
         }
 
@@ -325,14 +320,15 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// 連携アプリの設定が削除された場合のイベント処理
+        /// 連携アプリの設定が削除されたときのイベント処理
         /// </summary>
         /// <param name="_e">連携を解除するアプリ情報を格納したイベント引数</param>
         private void DeleteLinkageContents(object _sender, DeleteEventArgs _e)
         {
-            // 削除するIDを確認
+            // 削除するIDを取得
             int _deleteId = _e.DeleteId;
 
+            // 既存の外部連携アプリのリストからIDに一致するものを探して削除する
             for (int i = 0; i < ExtraAppSettingCollection.Count; i++)
             {
                 try
@@ -352,7 +348,7 @@ namespace PhotoViewer.ViewModel
             // ContextMenuの項目を更新
             UpdateContextMenuFromExtraAppSetting(ExtraAppSettingCollection);
 
-            // Confファイルに書き出し
+            // 設定ファイルに書き出し
             ExtraAppSetting.Export(ExtraAppSettingCollection);
         }
 
@@ -384,9 +380,9 @@ namespace PhotoViewer.ViewModel
             {
                 if(_drive.IsReady == true)
                 {
-                    bool _isDrive = true;
-                    var _explorerTree = new ExplorerTreeSourceViewModel(_drive.Name, _isDrive);
+                    var _explorerTree = new ExplorerTreeSourceViewModel(_drive.Name, true);
                     _explorerTree.ExplorerEvent += UpdatePictureContentsListFromExplorer;
+
                     ExplorerTree.Add(_explorerTree);
                 }
             }
@@ -409,6 +405,8 @@ namespace PhotoViewer.ViewModel
 
             // ファイルパスの更新
             SelectedPicturePath = _folder;
+
+            // ピクチャコンテンツのリスト更新処理
             UpdatePictureContentsList();
         }
 
@@ -452,7 +450,7 @@ namespace PhotoViewer.ViewModel
             // メディア情報のリストをクリア
             MediaInfoList.Clear();
 
-            // 読み込みスレッド
+            // 読み込みスレッド(時間がかかるので、別スレッドで読み込む)
             var _backgroundWorker = new BackgroundWorker();
             _backgroundWorker.WorkerSupportsCancellation = true;
             _backgroundWorker.DoWork += new DoWorkEventHandler(LoadPictureContentsWorker_DoWork);
@@ -691,7 +689,8 @@ namespace PhotoViewer.ViewModel
         private void DeleteMediaFromFolderClicked()
         {
             // メッセージボックスを表示し、削除確認を行う
-            MessageBoxResult result = MessageBox.Show("メディアファイルをフォルダから削除しますか？", "メディア削除の確認", MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
+            MessageBoxResult result = MessageBox.Show("メディアファイルをフォルダから削除しますか？", "メディア削除の確認", 
+                                                        MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
             
             // メッセージボックスの確認でOKだった場合、フォルダからファイル削除
             if (result == MessageBoxResult.OK)
