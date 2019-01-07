@@ -43,9 +43,8 @@ namespace PhotoViewer.Model
         /// 画像を開くメソッド
         /// </summary>
         /// <param name="_filePath">画像ファイルのパス</param>
-        public static BitmapSource CreateViewImage(MediaInfo _info)
+        public static BitmapSource CreateViewImage(string _filePath)
         {
-            string _filePath = _info.FilePath;
             using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
             {
                 BitmapSource _bitmapSource = null;
@@ -345,24 +344,13 @@ namespace PhotoViewer.Model
         }
 
         /// <summary>
-        /// ファイル名を取得するメソッド
-        /// </summary>
-        /// <param name="_info">メディア情報</param>
-        /// <returns>ファイル名を返す</returns>
-        public static string GetFileName(MediaInfo _info)
-        {
-            string _filePath = _info.FilePath;
-            return Path.GetFileName(_filePath);
-        }
-
-        /// <summary>
         /// MediaInfoからExif情報を削除するメソッド
         /// </summary>
         /// <param name="_info"></param>
-        public static bool DeleteExifInfo(MediaInfo _info)
+        public static bool DeleteExifInfo(string _filePath)
         {
-            Bitmap _bitmap = new Bitmap(_info.FilePath);
-            return SaveImageFile(_bitmap, _info.FilePath);
+            Bitmap _bitmap = new Bitmap(_filePath);
+            return SaveImageFile(_bitmap, _filePath);
         }
     }
 }

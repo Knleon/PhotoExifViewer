@@ -27,7 +27,7 @@ namespace PhotoViewer
         private void ListBoxItem_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             ListBoxItem _item = sender as ListBoxItem;
-            MediaInfo _info = _item.DataContext as MediaInfo;
+            MediaContentInfo _info = _item.DataContext as MediaContentInfo;
 
             MainWindowViewModel _model = this.DataContext as MainWindowViewModel;
 
@@ -39,7 +39,7 @@ namespace PhotoViewer
             }
             else
             {
-                _model.LoadViewImageSource(_info);
+                _model.LoadContentSource(_info);
             }
         }
 
@@ -75,7 +75,7 @@ namespace PhotoViewer
         private void ListBoxItem_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             ListBoxItem _item = sender as ListBoxItem;
-            MediaInfo _info = _item.DataContext as MediaInfo;
+            MediaContentInfo _info = _item.DataContext as MediaContentInfo;
 
             MainWindowViewModel _model = this.DataContext as MainWindowViewModel;
 
@@ -87,7 +87,7 @@ namespace PhotoViewer
             }
             else
             {
-                _model.LoadViewImageSource(_info);
+                _model.LoadContentSource(_info);
             }
         }
 
@@ -117,7 +117,7 @@ namespace PhotoViewer
         private void ListBoxItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ListBoxItem _item = sender as ListBoxItem;
-            MediaInfo _info = _item.DataContext as MediaInfo;
+            MediaContentInfo _info = _item.DataContext as MediaContentInfo;
 
             MainWindowViewModel _model = this.DataContext as MainWindowViewModel;
             _model.MediaInfoListDoubleClicked(_info);

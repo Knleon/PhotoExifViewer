@@ -49,7 +49,7 @@ namespace PhotoViewer.Model
         /// <summary>
         /// ExifデータをMediaInfoにセットするメソッド
         /// </summary>
-        public static void SetExifDataToMediaInfo(MediaInfo _info)
+        public static void SetExifDataToMediaInfo(PictureMediaContent _info)
         {
             // ファイルパスをセット
             string _filePath = _info.FilePath;

@@ -96,7 +96,9 @@ namespace PhotoViewer
             SetForegroundWindow(hWnd);
         }
 
-        private string[] _supportExtsHigher = { ".JPG", ".BMP", ".PNG", ".TIFF", ".TIF", ".GIF", ".NEF", ".DNG" };
+        public readonly string[] SupportPictureExtension = { ".jpg", ".bmp", ".png", ".tiff", ".tif", ".gif", ".nef", ".dng" };
+        public readonly string[] SupportMovieExtension = { ".avi", ".mp4" };
+
         /// <summary>
         /// アプリケーションでサポートするファイルの拡張子を取得する。
         /// </summary>
@@ -104,7 +106,15 @@ namespace PhotoViewer
         {
             get
             {
-                return _supportExtsHigher;
+                int _numSupportPictureExtension = SupportPictureExtension.Length;
+                int _numSupportMovieExtension = SupportMovieExtension.Length;
+                string[] _supportExtensions = new string[_numSupportPictureExtension + _numSupportMovieExtension];
+                
+                // サポートする拡張子の配列を結合
+                Array.Copy(SupportPictureExtension, _supportExtensions, _numSupportPictureExtension);
+                Array.Copy(SupportMovieExtension, 0, _supportExtensions, _numSupportPictureExtension, _numSupportMovieExtension);
+
+                return _supportExtensions;
             }
         }
 

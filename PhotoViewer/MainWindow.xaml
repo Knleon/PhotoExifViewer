@@ -61,63 +61,63 @@
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="撮影日時：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.MediaDate}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.MediaDate}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="カメラ製造元：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.CameraManufacturer}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.CameraManufacturer}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="カメラモデル：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.CameraModel}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.CameraModel}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="幅(pixel)：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.PictureWidth}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.PictureWidth}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="高さ(pixel)：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.PictureHeight}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.PictureHeight}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="水平方向の解像度(dpi)：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.HorizenResolution}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.HorizenResolution}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="垂直方向の解像度(dpi)：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.VerticalResolution}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.VerticalResolution}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="ビットの深さ：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.BitDepth}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.BitDepth}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="絞り値：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.Aperture, StringFormat={}{0:f1}}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.Aperture, StringFormat={}{0:f1}}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="シャッタースピード(秒)：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.ShutterSpeedText}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.ShutterSpeedText}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="ISO：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.Iso}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.Iso}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="焦点距離(mm)：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.FocalLength}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.FocalLength}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="測光モード：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.MeteringModeText}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.MeteringModeText}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="ホワイトバランス：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.WhiteBlanceText}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.WhiteBlanceText}" FontSize="12"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="5,5,0,5" TextWrapping="Wrap" Text="露出プログラム：" FontSize="12"/>
-                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedMediaInfo.ExposeProgramText}" FontSize="12"/>
+                                <TextBlock Margin="0,5" TextWrapping="Wrap" Text="{Binding SelectedPictureContent.ExposeProgramText}" FontSize="12"/>
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
@@ -193,7 +193,7 @@
                                 <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown"/>
                                 <EventSetter Event="PreviewGotKeyboardFocus" Handler="ListBoxItem_PreviewGotKeyboardFocus"/>
                                 <EventSetter Event="MouseDoubleClick" Handler="ListBoxItem_MouseDoubleClick"/>
-                                <Setter Property="ToolTip" Value="{Binding MediaInfoItemTooltip}"/>
+                                <Setter Property="ToolTip" Value="{Binding FileName}"/>
                                 <Setter Property="ContextMenu" Value="{StaticResource ListBoxItemMenu}"/>
                             </Style>
                         </ListBox.ItemContainerStyle>

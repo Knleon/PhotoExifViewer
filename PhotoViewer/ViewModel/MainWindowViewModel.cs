@@ -30,14 +30,34 @@ namespace PhotoViewer.ViewModel
             set { SetProperty(ref _viewImageSource, value); }
         }
 
-        private MediaInfo _selectedMediaInfo;
+        private MediaContentInfo _selectedMediaInfo;
         /// <summary>
         /// 選択されたメディア情報
         /// </summary>
-        public MediaInfo SelectedMediaInfo
+        public MediaContentInfo SelectedMediaInfo
         {
             get { return _selectedMediaInfo; }
             set { SetProperty(ref _selectedMediaInfo, value); }
+        }
+
+        private PictureMediaContent _selectedPictureContent;
+        /// <summary>
+        /// 選択されたピクチャ情報
+        /// </summary>
+        public PictureMediaContent SelectedPictureContent
+        {
+            get { return _selectedPictureContent; }
+            set { SetProperty(ref _selectedPictureContent, value); }
+        }
+
+        private MovieMediaContent _selectedMovieContent;
+        /// <summary>
+        /// 選択されたムービー情報
+        /// </summary>
+        public MovieMediaContent SelectedMovieContent
+        {
+            get { return _selectedMovieContent; }
+            set { SetProperty(ref _selectedMovieContent, value); }
         }
 
         private string _selectedPicturePath;
@@ -104,7 +124,7 @@ namespace PhotoViewer.ViewModel
         private bool LoadPictureContentsBackgroundWorker_Reload; 
 
         // 情報を格納するリスト
-        public ObservableCollection<MediaInfo> MediaInfoList { get; set; }
+        public ObservableCollection<MediaContentInfo> MediaInfoList { get; set; }
         public ObservableCollection<ExplorerTreeSourceViewModel> ExplorerTree { get; }
         public ObservableCollection<ContextMenuControl> ContextMenuCollection { get; set; }
         public ObservableCollection<ExtraAppSetting> ExtraAppSettingCollection { get; set; }
@@ -138,7 +158,7 @@ namespace PhotoViewer.ViewModel
             SetCommand();
 
             // 情報をもつリストを定義
-            MediaInfoList = new ObservableCollection<MediaInfo>();
+            MediaInfoList = new ObservableCollection<MediaContentInfo>();
             ExplorerTree = new ObservableCollection<ExplorerTreeSourceViewModel>();
             ContextMenuCollection = new ObservableCollection<ContextMenuControl>();
             ExtraAppSettingCollection = new ObservableCollection<ExtraAppSetting>();
@@ -453,7 +473,7 @@ namespace PhotoViewer.ViewModel
             // 読み込みスレッド(時間がかかるので、別スレッドで読み込む)
             var _backgroundWorker = new BackgroundWorker();
             _backgroundWorker.WorkerSupportsCancellation = true;
-            _backgroundWorker.DoWork += new DoWorkEventHandler(LoadPictureContentsWorker_DoWork);
+            _backgroundWorker.DoWork += new DoWorkEventHandler(LoadContentsWorker_DoWork);
             _backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(LoadPictureContentsWorker_Completed);
             LoadPictureContentsBackgroundWorker = _backgroundWorker;
 
@@ -462,9 +482,9 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// 静止画を読み込むスレッドの処理
+        /// メディアを読み込むスレッドの処理
         /// </summary>
-        private void LoadPictureContentsWorker_DoWork(object _sender, DoWorkEventArgs _args)
+        private void LoadContentsWorker_DoWork(object _sender, DoWorkEventArgs _args)
         {
             try
             {
@@ -512,24 +532,20 @@ namespace PhotoViewer.ViewModel
                     return;
                 }
 
-                MediaInfo _mediaInfo = new MediaInfo();
+                MediaContentInfo _mediaFileInfo = new MediaContentInfo();
 
-                // ファイルパスとファイル名を設定
-                _mediaInfo.FilePath = _filePath;
-                _mediaInfo.FileName = Path.GetFileName(_filePath);
-
-                // Tooltipのファイル名を登録
-                _mediaInfo.MediaInfoItemTooltip = ImageFileControl.GetFileName(_mediaInfo);
+                // ファイルパスを設定
+                _mediaFileInfo.FilePath = _filePath;
 
                 // ThumbnailImageの作成
-                _mediaInfo.ThumbnailImage = ImageFileControl.CreateThumnailImage(_mediaInfo.FilePath);
-                _mediaInfo.ThumbnailImage.Freeze();
+                _mediaFileInfo.ThumbnailImage = _mediaFileInfo.CreateThumbnailImage(_mediaFileInfo);
+                _mediaFileInfo.ThumbnailImage.Freeze();
 
                 // 準備できたものから先に画像をリストに登録
                 var _dispatcher = App.Current.Dispatcher;
                 _dispatcher.Invoke(new Action(() =>
                 {
-                    MediaInfoList.Add(_mediaInfo);
+                    MediaInfoList.Add(_mediaFileInfo);
                 }));
 
                 System.Threading.Thread.Sleep(50);
@@ -600,13 +616,13 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// Viewに拡大表示するImageSourceを読み込むメソッド
+        /// 選択したメディアをロードする
         /// </summary>
-        /// <param name="_info">拡大表示するメディア情報</param>
-        public async void LoadViewImageSource(MediaInfo _info)
+        /// <param name="_info">選択したメディア情報</param>
+        public void LoadContentSource(MediaContentInfo _info)
         {
             // 以前に選択されたMediaと同じ場合はロードしない
-            if(SelectedMediaInfo == _info)
+            if (SelectedMediaInfo == _info)
             {
                 return;
             }
@@ -629,9 +645,31 @@ namespace PhotoViewer.ViewModel
             // 選択されているMediaの情報を保持
             SelectedMediaInfo = _info;
 
+            switch (_info.ContentMediaType)
+            {
+                case MediaContentInfo.MediaType.PICTURE:
+                    SelectedPictureContent = new PictureMediaContent(SelectedMediaInfo);
+                    LoadViewImageSource(SelectedPictureContent);
+                    break;
+                case MediaContentInfo.MediaType.MOVIE:
+                    // Todo:いずれ追加
+                    break;
+                case MediaContentInfo.MediaType.UNKNOWN:
+                default:
+                    // Todo: エラー処理が必要
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Viewに拡大表示するImageSourceを読み込むメソッド
+        /// </summary>
+        /// <param name="_info">拡大表示するメディア情報</param>
+        public async void LoadViewImageSource(PictureMediaContent _info)
+        {
             // 画像を表示
             IsReadMedia = true;
-            await Task.Run(() => SetPictureAndExifInfo());
+            await Task.Run(() => SetPictureAndExifInfo(_info));
             IsReadMedia = false;
 
             // SaveButtonとExifDeleteButtonの有効化
@@ -647,9 +685,9 @@ namespace PhotoViewer.ViewModel
         /// <summary>
         /// 静止画とExif情報を設定する
         /// </summary>
-        private void SetPictureAndExifInfo()
+        private void SetPictureAndExifInfo(PictureMediaContent _info)
         {
-            BitmapSource _openImage = ImageFileControl.CreateViewImage(SelectedMediaInfo);
+            BitmapSource _openImage = ImageFileControl.CreateViewImage(_info.FilePath);
             _openImage.Freeze();
 
             // 画像を表示
@@ -659,7 +697,7 @@ namespace PhotoViewer.ViewModel
                 ViewImageSource = _openImage;
 
                 // Exif情報を取得
-                ExifParser.SetExifDataToMediaInfo(SelectedMediaInfo);
+                ExifParser.SetExifDataToMediaInfo(_info);
             }));
 
             System.Threading.Thread.Sleep(50);
@@ -669,7 +707,7 @@ namespace PhotoViewer.ViewModel
         /// MediaInfoListの画像をダブルクリックしたときの動作
         /// </summary>
         /// <param name="_info">選択したメディア情報</param>
-        public void MediaInfoListDoubleClicked(MediaInfo _info)
+        public void MediaInfoListDoubleClicked(MediaContentInfo _info)
         {
             // TODO ファイルを別アプリで開くことを検討中
             string _selectFilePath = _info.FilePath;
@@ -736,18 +774,27 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void ExifDeleteButtonClicked()
         {
+            // ピクチャメディアであるか確認
+            if (SelectedMediaInfo.ContentMediaType != MediaContentInfo.MediaType.PICTURE)
+            {
+                // 何もしない
+                return;
+            }
+
+            string _filePath = SelectedMediaInfo.FilePath;
+
             // ファイルチェック
-            if (!File.Exists(SelectedMediaInfo.FilePath))
+            if (!File.Exists(_filePath))
             {
                 MessageBox.Show("ファイルは存在しません", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             // アクセス権のチェック
-            if (!IsFileLocked(SelectedMediaInfo.FilePath))
+            if (!IsFileLocked(_filePath))
             {
                 // Exif情報を削除して画像を保存
-                if (ImageFileControl.DeleteExifInfo(SelectedMediaInfo))
+                if (ImageFileControl.DeleteExifInfo(_filePath))
                 {
                     // Exif情報を削除した画像を保存後、現在のディレクトリを再読込
                     UpdatePictureContentsList();

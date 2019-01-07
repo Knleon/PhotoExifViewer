@@ -90,10 +90,10 @@
     <Compile Include="Model\ContextMenuControl.cs" />
     <Compile Include="Model\ExifParser.cs" />
     <Compile Include="Model\ExtraAppSetting.cs" />
+    <Compile Include="Model\MediaContentInfo.cs" />
     <Compile Include="Model\WindowsIconCreator.cs" />
     <Compile Include="ViewModel\ExplorerTreeSourceViewModel.cs" />
     <Compile Include="Model\ImageFileControl.cs" />
-    <Compile Include="Model\MediaInfo.cs" />
     <Compile Include="ViewModel\LinkageProgramViewModel.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="View\InformationView.xaml.cs">
