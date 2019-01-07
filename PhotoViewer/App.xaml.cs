@@ -97,7 +97,7 @@ namespace PhotoViewer
         }
 
         public readonly string[] SupportPictureExtension = { ".jpg", ".bmp", ".png", ".tiff", ".tif", ".gif", ".nef", ".dng" };
-        public readonly string[] SupportMovieExtension = { ".avi", ".mp4" };
+        public readonly string[] SupportMovieExtension = {};
 
         /// <summary>
         /// アプリケーションでサポートするファイルの拡張子を取得する。
