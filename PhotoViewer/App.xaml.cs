@@ -79,8 +79,10 @@ namespace PhotoViewer
         private static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
         [DllImport("user32.dll")]
         private static extern bool IsIconic(IntPtr hWnd);
+        
         // ShowWindowAsync関数のパラメータに渡す定義値
         private const int SW_RESTORE = 9;  // 画面を元の大きさに戻す
+
         /// <summary>
         /// 外部プロセスのウィンドウを起動するメソッド
         /// </summary>

@@ -83,7 +83,7 @@ namespace PhotoViewer.Model
             }
             catch
             {
-                return;
+                throw new IOException();
             }
         }
 
