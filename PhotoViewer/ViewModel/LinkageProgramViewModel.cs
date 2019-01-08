@@ -110,11 +110,11 @@ namespace PhotoViewer.ViewModel
             LinkApp1ReferenceCommand = new DelegateCommand(LinkApp1ReferenceButtonClicked);
             LinkApp2ReferenceCommand = new DelegateCommand(LinkApp2ReferenceButtonClicked);
             LinkApp3ReferenceCommand = new DelegateCommand(LinkApp3ReferenceButtonClicked);
-            LinkApp1DeleteCommand = new DelegateCommand(LinkApp1DeleteButtonClicked);
-            LinkApp2DeleteCommand = new DelegateCommand(LinkApp2DeleteButtonClicked);
-            LinkApp3DeleteCommand = new DelegateCommand(LinkApp3DeleteButtonClicked);
-            RegisterLinkAppCommand = new DelegateCommand(RegisterLinkAppButtonClicked);
-            AllLinkAppDeleteCommand = new DelegateCommand(AllLinkAppDeleteButtonClicked);
+            LinkApp1DeleteCommand    = new DelegateCommand(LinkApp1DeleteButtonClicked);
+            LinkApp2DeleteCommand    = new DelegateCommand(LinkApp2DeleteButtonClicked);
+            LinkApp3DeleteCommand    = new DelegateCommand(LinkApp3DeleteButtonClicked);
+            RegisterLinkAppCommand   = new DelegateCommand(RegisterLinkAppButtonClicked);
+            AllLinkAppDeleteCommand  = new DelegateCommand(AllLinkAppDeleteButtonClicked);
         }
 
         /// <summary>

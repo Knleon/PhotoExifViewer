@@ -34,7 +34,7 @@ namespace PhotoViewer
             // 元々の画像を読み込み中の場合
             if (_model.IsReadMedia)
             {
-                // 現状は何もしない
+                // 何もしない
                 return;
             }
             else
@@ -82,7 +82,7 @@ namespace PhotoViewer
             // 元々の画像を読み込み中の場合
             if (_model.IsReadMedia)
             {
-                // 現状は何もしない
+                // 何もしない
                 return;
             }
             else

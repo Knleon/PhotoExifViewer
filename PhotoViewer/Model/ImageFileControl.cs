@@ -11,8 +11,6 @@ namespace PhotoViewer.Model
 {
     public static class ImageFileControl
     {  
-        static private readonly string FolderDialogTitle = "フォルダ選択ダイアログ";
-
         /// <summary>
         /// ObservableCollectionにフォルダ内に存在する画像ファイルのリストを保存するメソッド
         /// </summary>
@@ -24,6 +22,7 @@ namespace PhotoViewer.Model
             var dialog = new CommonOpenFileDialog();
 
             // フォルダ選択ダイアログの設定
+            const string FolderDialogTitle = "フォルダ選択ダイアログ";
             dialog.Title = FolderDialogTitle;
             dialog.EnsureReadOnly = false;
             dialog.AllowNonFileSystemItems = false;
@@ -58,10 +57,12 @@ namespace PhotoViewer.Model
                     _bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                     _bitmapImage.EndInit();
 
+                    // 画像からメタデータを取得する
                     _stream.Position = 0;
                     var _metaData = (BitmapFrame.Create(_stream).Metadata) as BitmapMetadata;
                     _stream.Close();
 
+                    // 画像を回転する
                     _bitmapSource = RotateBitmapSource(_metaData, _bitmapImage);
                 }
                 else
@@ -71,11 +72,12 @@ namespace PhotoViewer.Model
                     _bitmapSource = _bmpDecoder.Frames[0];
                 }
 
+                // 表示する画像を生成する
                 const uint _maxContentsWidth = 880;
                 const uint _maxContentsHeight = 660;
                 _bitmapSource = CreateResizeImage(_bitmapSource, _maxContentsWidth, _maxContentsHeight);
-
                 _bitmapSource.Freeze();
+
                 return _bitmapSource;
             }
         }
@@ -117,12 +119,12 @@ namespace PhotoViewer.Model
                     _thumbnailSource = RotateBitmapSource(_metaData, _thumbnailSource);
                 }
 
-                // サムネイル画像をリサイズ(100x75以上のものはこのサイズに収まるように縮小)
+                // サムネイル画像を生成する(100x75以上のものはこのサイズに収まるように縮小)
                 const uint _maxContentsWidth = 100;
                 const uint _maxContentsHeight = 75;
                 _thumbnailSource = CreateResizeImage(_thumbnailSource, _maxContentsWidth, _maxContentsHeight);
-
                 _thumbnailSource.Freeze();
+
                 return _thumbnailSource;
             }
         }
@@ -180,68 +182,81 @@ namespace PhotoViewer.Model
             {
                 string _filePath = sfd.FileName;
                 string _extension = Path.GetExtension(_filePath).ToLower();
+
+                // Bitmap画像を保存する
+                SaveBitmapImage(_bitmap, _extension, _filePath);
                 
-                if(_extension == ".jpg")
-                {
-                    // Jpegファイルで保存する場合
-                    Bitmap _saveBitmap = new Bitmap(_bitmap);
-
-                    // Qualityの設定
-                    const long _quality = 90;
-                    System.Drawing.Imaging.EncoderParameters _eps = new System.Drawing.Imaging.EncoderParameters(1);
-                    System.Drawing.Imaging.EncoderParameter _ep = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, _quality);
-                    _eps.Param[0] = _ep;
-
-                    // エンコーダに関する情報を取得
-                    System.Drawing.Imaging.ImageCodecInfo ici = GetEncoderInfo(System.Drawing.Imaging.ImageFormat.Jpeg);
-
-                    _saveBitmap.Save(_filePath, ici, _eps);
-
-                    // クリア
-                    _saveBitmap.Dispose();
-                    _eps.Dispose();
-                }
-                else if(_extension == ".png")
-                {
-                    // Pngファイルで保存する場合
-                    Bitmap _saveBitmap = new Bitmap(_bitmap);
-                    _saveBitmap.Save(_filePath, System.Drawing.Imaging.ImageFormat.Png);
-
-                    // クリア
-                    _saveBitmap.Dispose();
-                }
-                else if(_extension == ".bmp")
-                {
-                    // Bmpファイルで保存する場合
-                    Bitmap _saveBitmap = new Bitmap(_bitmap);
-                    _saveBitmap.Save(_filePath, System.Drawing.Imaging.ImageFormat.Bmp);
-
-                    // クリア
-                    _saveBitmap.Dispose();
-                }
-                else if(_extension == ".gif")
-                {
-                    // Gifファイルで保存する場合
-                    Bitmap _saveBitmap = new Bitmap(_bitmap);
-                    _saveBitmap.Save(_filePath, System.Drawing.Imaging.ImageFormat.Gif);
-
-                    // クリア
-                    _saveBitmap.Dispose();
-                }
-                else
-                {
-                    // Tiffファイルで保存する場合
-                    Bitmap _saveBitmap = new Bitmap(_bitmap);
-                    _saveBitmap.Save(_filePath, System.Drawing.Imaging.ImageFormat.Tiff);
-
-                    // クリア
-                    _saveBitmap.Dispose();
-                }
                 return true;
             }
             else
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// ビットマップ画像を保存する
+        /// </summary>
+        /// <param name="_bitmap">保存する画像</param>
+        /// <param name="_extension">保存するファイル拡張子</param>
+        /// <param name="_filePath">保存するファイルパス</param>
+        private static void SaveBitmapImage(Bitmap _bitmap, string _extension,  string _filePath)
+        {
+            if (_extension == ".jpg")
+            {
+                // Jpegファイルで保存する場合
+                Bitmap _saveBitmap = new Bitmap(_bitmap);
+
+                // Qualityの設定
+                const long _quality = 90;
+                System.Drawing.Imaging.EncoderParameters _eps = new System.Drawing.Imaging.EncoderParameters(1);
+                System.Drawing.Imaging.EncoderParameter _ep = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, _quality);
+                _eps.Param[0] = _ep;
+
+                // エンコーダに関する情報を取得
+                System.Drawing.Imaging.ImageCodecInfo ici = GetEncoderInfo(System.Drawing.Imaging.ImageFormat.Jpeg);
+
+                _saveBitmap.Save(_filePath, ici, _eps);
+
+                // クリア
+                _saveBitmap.Dispose();
+                _eps.Dispose();
+            }
+            else if (_extension == ".png")
+            {
+                // Pngファイルで保存する場合
+                Bitmap _saveBitmap = new Bitmap(_bitmap);
+                _saveBitmap.Save(_filePath, System.Drawing.Imaging.ImageFormat.Png);
+
+                // クリア
+                _saveBitmap.Dispose();
+            }
+            else if (_extension == ".bmp")
+            {
+                // Bmpファイルで保存する場合
+                Bitmap _saveBitmap = new Bitmap(_bitmap);
+                _saveBitmap.Save(_filePath, System.Drawing.Imaging.ImageFormat.Bmp);
+
+                // クリア
+                _saveBitmap.Dispose();
+            }
+            else if (_extension == ".gif")
+            {
+                // Gifファイルで保存する場合
+                Bitmap _saveBitmap = new Bitmap(_bitmap);
+                _saveBitmap.Save(_filePath, System.Drawing.Imaging.ImageFormat.Gif);
+
+                // クリア
+                _saveBitmap.Dispose();
+            }
+            else
+            {
+                // Tiffファイルで保存する場合
+                Bitmap _saveBitmap = new Bitmap(_bitmap);
+                _saveBitmap.Save(_filePath, System.Drawing.Imaging.ImageFormat.Tiff);
+
+                // クリア
+                _saveBitmap.Dispose();
             }
         }
 
@@ -297,14 +312,14 @@ namespace PhotoViewer.Model
             uint _sourceWidth = (uint)_source.PixelWidth;
             uint _sourceHeigth = (uint)_source.PixelHeight;
 
+            bool _isSmaller = true;
+
             if(_sourceWidth > _maxWidth || _sourceHeigth > _maxHeight)
             {
-                return false;
+                _isSmaller = false;
             }
-            else
-            {
-                return true;
-            }
+
+            return _isSmaller;
         }
 
         /// <summary>
