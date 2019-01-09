@@ -91,6 +91,7 @@
     <Compile Include="Model\ExifParser.cs" />
     <Compile Include="Model\ExtraAppSetting.cs" />
     <Compile Include="Model\MediaContentInfo.cs" />
+    <Compile Include="Model\NaturalSortHelper.cs" />
     <Compile Include="Model\WindowsIconCreator.cs" />
     <Compile Include="ViewModel\ExplorerTreeSourceViewModel.cs" />
     <Compile Include="Model\ImageFileControl.cs" />

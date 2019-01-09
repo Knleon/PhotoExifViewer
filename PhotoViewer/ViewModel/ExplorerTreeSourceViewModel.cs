@@ -1,5 +1,6 @@
 ﻿using PhotoViewer.Model;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -101,20 +102,29 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void UpdateDirectoryNode()
         {
+            // ソート用にDirectoryInfoのリストを保持する
+            ObservableCollection<DirectoryInfo> _tmpDirecotyInfoList = new ObservableCollection<DirectoryInfo>();
+            foreach (var _dirInfo in _Directory.GetDirectories()) _tmpDirecotyInfoList.Add(_dirInfo);
+
+            // 自然順でディレクトリのリストを入れ替える
+            _tmpDirecotyInfoList = new ObservableCollection<DirectoryInfo>(NaturalSortHelper.NaturallyOrderBy<DirectoryInfo>(_tmpDirecotyInfoList, p => p.Name));
+
+            // TreeViewItemをリセット
             Items.Clear();
-            foreach (var _dirInfo in _Directory.GetDirectories())
+
+            foreach (var _tmpDirInfo in _tmpDirecotyInfoList)
             {
-                if (!IsDirectoryLocked(_dirInfo.FullName))
+                if (!IsDirectoryLocked(_tmpDirInfo.FullName))
                 {
                     // ファイル名の最初の文字を取得
-                    string _fileNameFirst = Path.GetFileName(_dirInfo.FullName).Substring(0, 1);
+                    string _fileNameFirst = Path.GetFileName(_tmpDirInfo.FullName).Substring(0, 1);
                     const string _tempRecycleFileIndicator = "$";
 
                     // 最初の文字が”$”だった場合、Windowsの特殊ファイルのためスキップ
                     if (_fileNameFirst != _tempRecycleFileIndicator)
                     {
                         bool _isDrive = false;
-                        var _node = new ExplorerTreeSourceViewModel(_dirInfo.FullName, _isDrive);
+                        var _node = new ExplorerTreeSourceViewModel(_tmpDirInfo.FullName, _isDrive);
                         Items.Add(_node);
                     }
                 }
