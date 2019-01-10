@@ -55,6 +55,7 @@ namespace PhotoViewer.Model
                     _bitmapImage.BeginInit();
                     _bitmapImage.StreamSource = _stream;
                     _bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    _bitmapImage.CreateOptions = BitmapCreateOptions.None;
                     _bitmapImage.EndInit();
 
                     // 画像からメタデータを取得する
@@ -68,7 +69,7 @@ namespace PhotoViewer.Model
                 else
                 {
                     // Raw Image case
-                    BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnDemand);
+                    BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
                     _bitmapSource = _bmpDecoder.Frames[0];
                 }
 
@@ -337,8 +338,13 @@ namespace PhotoViewer.Model
             double _scale = Math.Min(_scaleX, _scaleY);
 
             // 縮小されたBitmapを作成
-            BitmapSource _resizeImageSource = new WriteableBitmap(new TransformedBitmap(_source, new ScaleTransform(_scale, _scale)));
-            _resizeImageSource.Freeze();
+            var _transformedBitmap = new TransformedBitmap();
+            _transformedBitmap.BeginInit();
+            _transformedBitmap.Source = _source;
+            _transformedBitmap.Transform = new ScaleTransform(_scale, _scale);
+            _transformedBitmap.EndInit();
+
+            BitmapSource _resizeImageSource = new WriteableBitmap(_transformedBitmap);
 
             return _resizeImageSource;
         }

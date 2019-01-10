@@ -28,7 +28,7 @@
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
-                    <RowDefinition Height="420"/>
+                    <RowDefinition Height="430"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0" Margin="5">
@@ -208,7 +208,7 @@
                                                     <RowDefinition Height="75"/>
                                                     <RowDefinition Height="*"/>
                                                 </Grid.RowDefinitions>
-                                                <Image Grid.Row="0" Source="{Binding ThumbnailImage}"/>
+                                                <Image Grid.Row="0" Source="{Binding ThumbnailImage}" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
                                                 <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="{Binding FileName}" TextTrimming="CharacterEllipsis"/>
                                             </Grid>
                                         </DataTemplate>
@@ -218,7 +218,7 @@
                         </ListBox.Style>
                     </ListBox>
                 </Border>
-                <Image Grid.Row="2" x:Name="viewImage" Source="{Binding ViewImageSource}" VerticalAlignment="Center" Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" Margin="5,5,5,5"/>
+                <Image Grid.Row="2" x:Name="viewImage" Source="{Binding ViewImageSource}" VerticalAlignment="Center" Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" RenderOptions.BitmapScalingMode="LowQuality" Margin="5,5,5,5"/>
             </Grid>
         </Grid>
     </Grid>
