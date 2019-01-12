@@ -58,8 +58,8 @@
     <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\WindowsAPICodePack-Shell.1.1.1\lib\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
     </Reference>
-    <Reference Include="Prism, Version=7.0.0.396, Culture=neutral, PublicKeyToken=40ee6c3a2184dc59, processorArchitecture=MSIL">
-      <HintPath>..\packages\Prism.Core.7.0.0.396\lib\net45\Prism.dll</HintPath>
+    <Reference Include="Prism, Version=7.1.0.431, Culture=neutral, PublicKeyToken=40ee6c3a2184dc59, processorArchitecture=MSIL">
+      <HintPath>..\packages\Prism.Core.7.1.0.431\lib\net45\Prism.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -90,6 +90,7 @@
     <Compile Include="Model\ContextMenuControl.cs" />
     <Compile Include="Model\ExifParser.cs" />
     <Compile Include="Model\ExtraAppSetting.cs" />
+    <Compile Include="Model\MediaContentChecker.cs" />
     <Compile Include="Model\MediaContentInfo.cs" />
     <Compile Include="Model\NaturalSortHelper.cs" />
     <Compile Include="Model\WindowsIconCreator.cs" />

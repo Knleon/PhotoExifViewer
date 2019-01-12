@@ -98,28 +98,6 @@ namespace PhotoViewer
             SetForegroundWindow(hWnd);
         }
 
-        public readonly string[] SupportPictureExtension = { ".jpg", ".bmp", ".png", ".tiff", ".tif", ".gif", ".nef", ".dng" };
-        public readonly string[] SupportMovieExtension = {};
-
-        /// <summary>
-        /// アプリケーションでサポートするファイルの拡張子を取得する。
-        /// </summary>
-        public string[] SupportExts
-        {
-            get
-            {
-                int _numSupportPictureExtension = SupportPictureExtension.Length;
-                int _numSupportMovieExtension = SupportMovieExtension.Length;
-                string[] _supportExtensions = new string[_numSupportPictureExtension + _numSupportMovieExtension];
-                
-                // サポートする拡張子の配列を結合
-                Array.Copy(SupportPictureExtension, _supportExtensions, _numSupportPictureExtension);
-                Array.Copy(SupportMovieExtension, 0, _supportExtensions, _numSupportPictureExtension, _numSupportMovieExtension);
-
-                return _supportExtensions;
-            }
-        }
-
         /// <summary>
         /// 現在のAppクラスのインスタンスを取得する
         /// </summary>
@@ -132,19 +110,42 @@ namespace PhotoViewer
         /// 例外発生時はコンソールにエラーメッセージを出力する
         /// </summary>
         /// <param name="_ex">例外時のメッセージ</param>
-        public static void LogException(Exception _ex)
+        public static void LogException(Exception ex, 
+            [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "",
+            [System.Runtime.CompilerServices.CallerLineNumber] int callerLineNumber = 0)
         {
-            Console.WriteLine(_ex.Message);
+            Console.WriteLine("ERROR -> " + ex.Message + ", LineNumber:" + callerLineNumber + ", FilePath:" + callerFilePath);
         }
 
-        public App()
+        /// <summary>
+        /// エラーメッセージボックスを表示する
+        /// </summary>
+        /// <param name="message">メッセージ</param>
+        /// <param name="caption">タイトル</param>
+        public static void ShowErrorMessageBox(string message, string caption)
         {
-            var font = new System.Windows.Media.FontFamily("Segoe UI");
+            MessageBox.Show(message, caption, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
 
-            var style = new Style(typeof(Window));
-            style.Setters.Add(new Setter(Window.FontFamilyProperty, font));
+        /// <summary>
+        /// 警告メッセージボックスを表示する
+        /// </summary>
+        /// <param name="message">メッセージ</param>
+        /// <param name="caption">タイトル</param>
+        public static void ShowWarningMessageBox(string message, string caption)
+        {
+            MessageBox.Show(message, caption, MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
 
-            FrameworkElement.StyleProperty.OverrideMetadata(typeof(Window), new FrameworkPropertyMetadata(style));
+        /// <summary>
+        /// 質問メッセージボックスを表示する
+        /// </summary>
+        /// <param name="message">メッセージ</param>
+        /// <param name="caption">タイトル</param>
+        /// <returns>結果</returns>
+        public static MessageBoxResult ShowQuestionMessageBox(string message, string caption)
+        {
+            return MessageBox.Show(message, caption, MessageBoxButton.OKCancel, MessageBoxImage.Question);
         }
     }
 }

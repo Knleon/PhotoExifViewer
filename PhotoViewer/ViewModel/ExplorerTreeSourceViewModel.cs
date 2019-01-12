@@ -104,7 +104,8 @@ namespace PhotoViewer.ViewModel
         {
             // ソート用にDirectoryInfoのリストを保持する
             ObservableCollection<DirectoryInfo> _tmpDirecotyInfoList = new ObservableCollection<DirectoryInfo>();
-            foreach (var _dirInfo in _Directory.GetDirectories()) _tmpDirecotyInfoList.Add(_dirInfo);
+            var _directoryInfoList = _Directory.GetDirectories().ToList();
+            foreach (var _dirInfo in _directoryInfoList) _tmpDirecotyInfoList.Add(_dirInfo);
 
             // 自然順でディレクトリのリストを入れ替える
             _tmpDirecotyInfoList = new ObservableCollection<DirectoryInfo>(NaturalSortHelper.NaturallyOrderBy<DirectoryInfo>(_tmpDirecotyInfoList, p => p.Name));

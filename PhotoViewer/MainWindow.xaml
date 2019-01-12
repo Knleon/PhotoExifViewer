@@ -7,7 +7,7 @@
         ResizeMode="CanResize"
         Icon="/Image/PhotoExifViewerIcon.ico"
         WindowStartupLocation="CenterScreen"
-        Title="Photo Exif Viewer" Height ="890" Width="1205" MinHeight="890" MinWidth="1220"
+        Title="Photo Exif Viewer" Height ="890" Width="1205" MinHeight="890" MinWidth="1240"
         Closing="Window_Closing">
     <Window.Background>
         <SolidColorBrush Color="#F0F0F0"/>
@@ -22,13 +22,13 @@
         <Line X1="0" Y1="40" X2="10000" Y2="40" StrokeThickness="1" Stroke="DarkSlateGray" Grid.ColumnSpan="2"/>
         <Grid Grid.Row="1" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="0.25*"/>
-                <ColumnDefinition Width="0.75*"/>
+                <ColumnDefinition Width="0.3*"/>
+                <ColumnDefinition Width="0.7*" MinWidth="910"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
-                    <RowDefinition Height="430"/>
+                    <RowDefinition Height="Auto"/>  <!--子要素のサイズに合わせて自動リサイズ-->
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0" Margin="5">
@@ -208,7 +208,7 @@
                                                     <RowDefinition Height="75"/>
                                                     <RowDefinition Height="*"/>
                                                 </Grid.RowDefinitions>
-                                                <Image Grid.Row="0" Source="{Binding ThumbnailImage}" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+                                                <Image Grid.Row="0" Source="{Binding ThumbnailImage}"/>
                                                 <TextBlock Grid.Row="1" HorizontalAlignment="Center" Text="{Binding FileName}" TextTrimming="CharacterEllipsis"/>
                                             </Grid>
                                         </DataTemplate>
@@ -218,7 +218,7 @@
                         </ListBox.Style>
                     </ListBox>
                 </Border>
-                <Image Grid.Row="2" x:Name="viewImage" Source="{Binding ViewImageSource}" VerticalAlignment="Center" Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" RenderOptions.BitmapScalingMode="LowQuality" Margin="5,5,5,5"/>
+                <Image Grid.Row="2" x:Name="viewImage" Source="{Binding ViewImageSource}" VerticalAlignment="Center" Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" Margin="5,5,5,5"/>
             </Grid>
         </Grid>
     </Grid>

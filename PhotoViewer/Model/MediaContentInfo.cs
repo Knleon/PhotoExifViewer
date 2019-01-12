@@ -96,57 +96,17 @@ namespace PhotoViewer.Model
         {
             string _extension = Path.GetExtension(_filePath).ToLower();
 
-            if (CheckPictureExtension(_extension))
+            if (MediaContentChecker.CheckPictureExtensions(_extension))
             {
                 return MediaType.PICTURE;
             }
 
-            if (CheckMovieExtension(_extension))
+            if (MediaContentChecker.CheckMovieExtensions(_extension))
             {
                 return MediaType.MOVIE;
             }
 
             return MediaType.UNKNOWN;
-        }
-
-        /// <summary>
-        /// 静止画のサポートする拡張子であるか確認する
-        /// </summary>
-        /// <param name="_extension">確認する拡張子</param>
-        /// <returns>サポートする拡張子の場合はTrue</returns>
-        private bool CheckPictureExtension(string _extension)
-        {
-            bool _isSupport = false;
-
-            foreach (var _supportExtension in App.Current.SupportPictureExtension)
-            {
-                if (_supportExtension == _extension)
-                {
-                    _isSupport = true;
-                }
-            }
-
-            return _isSupport;
-        }
-
-        /// <summary>
-        /// 動画のサポートする拡張子であるか確認する
-        /// </summary>
-        /// <param name="_extension">確認する拡張子</param>
-        /// <returns>サポートする拡張子の場合はTrue</returns>
-        private bool CheckMovieExtension(string _extension)
-        {
-            bool _isSupport = false;
-
-            foreach (var _supportExtension in App.Current.SupportMovieExtension)
-            {
-                if (_supportExtension == _extension)
-                {
-                    _isSupport = true;
-                }
-            }
-
-            return _isSupport;
         }
 
         /// <summary>

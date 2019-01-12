@@ -504,7 +504,7 @@ namespace PhotoViewer.ViewModel
             List<string> _filePathsList = new List<string>();
 
             // 選択されたフォルダ内に存在するサポートされる拡張子のファイルをすべて取得
-            foreach (string _supportExt in App.Current.SupportExts)
+            foreach (string _supportExt in MediaContentChecker.GetSupportExtensions())
             {
                 // キャンセルチェック
                 var _worker = _sender as BackgroundWorker;
@@ -596,7 +596,13 @@ namespace PhotoViewer.ViewModel
             SetIsEnableButton(IsEnableFlag);
 
             // フォルダ選択ダイアログの表示
-            string _openFolderPath = ImageFileControl.OpenDirectory();
+            string _openFolderPath = ImageFileControl.GetFolderInDirectory();
+
+            if (_openFolderPath == null)
+            {
+                // フォルダ選択ダイアログでキャンセルを押したので何もしない
+                return;
+            }
 
             // ピクチャコンテンツリストを変更
             ChangePictureContentsList(_openFolderPath);
@@ -630,7 +636,7 @@ namespace PhotoViewer.ViewModel
             // ファイルチェック
             if (!File.Exists(_info.FilePath))
             {
-                MessageBox.Show("ファイルは存在しません", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                App.ShowErrorMessageBox("ファイルは存在しません", "ファイルアクセスエラー");
                 return;
             }
 
@@ -638,7 +644,7 @@ namespace PhotoViewer.ViewModel
             if (IsFileLocked(_info.FilePath))
             {
                 // ロックされている場合
-                MessageBox.Show("ファイルはロックされています", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                App.ShowErrorMessageBox("ファイルはロックされています", "ファイルアクセスエラー");
                 return;
             }
 
@@ -675,11 +681,6 @@ namespace PhotoViewer.ViewModel
             // SaveButtonとExifDeleteButtonの有効化
             const bool IsEnableFlag = true;
             SetIsEnableButton(IsEnableFlag);
-
-            // 強制メモリ解放
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
 
         /// <summary>
@@ -700,7 +701,13 @@ namespace PhotoViewer.ViewModel
                 ExifParser.SetExifDataToMediaInfo(_info);
             }));
 
+            _openImage = null;
             System.Threading.Thread.Sleep(50);
+
+            // 強制メモリ解放
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
         }
 
         /// <summary>
@@ -725,20 +732,16 @@ namespace PhotoViewer.ViewModel
         /// ListBoxItemの右クリックでメディア削除が押されたときの動作
         /// </summary>
         private void DeleteMediaFromFolderClicked()
-        {
-            // メッセージボックスを表示し、削除確認を行う
-            MessageBoxResult result = MessageBox.Show("メディアファイルをフォルダから削除しますか？", "メディア削除の確認", 
-                                                        MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
-            
+        {          
             // メッセージボックスの確認でOKだった場合、フォルダからファイル削除
-            if (result == MessageBoxResult.OK)
+            if (App.ShowQuestionMessageBox("メディアファイルをフォルダから削除しますか？", "メディア削除の確認") == MessageBoxResult.OK)
             {
                 try
                 {
                     // ファイルチェック
                     if (!File.Exists(SelectedMediaInfo.FilePath))
                     {
-                        MessageBox.Show("ファイルは存在しません", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        App.ShowErrorMessageBox("ファイルは存在しません", "ファイルアクセスエラー");
                         return;
                     }
 
@@ -753,7 +756,7 @@ namespace PhotoViewer.ViewModel
                     }
                     else
                     {
-                        MessageBox.Show("ファイルはロックされています", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                       App.ShowErrorMessageBox("ファイルはロックされています", "ファイルアクセスエラー");
                         return;
                     }
                 }
@@ -786,24 +789,32 @@ namespace PhotoViewer.ViewModel
             // ファイルチェック
             if (!File.Exists(_filePath))
             {
-                MessageBox.Show("ファイルは存在しません", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                App.ShowErrorMessageBox("ファイルは存在しません", "ファイルアクセスエラー");
                 return;
             }
 
-            // アクセス権のチェック
-            if (!IsFileLocked(_filePath))
+            try
             {
-                // Exif情報を削除して画像を保存
-                if (ImageFileControl.DeleteExifInfo(_filePath))
+                // アクセス権のチェック
+                if (!IsFileLocked(_filePath))
                 {
-                    // Exif情報を削除した画像を保存後、現在のディレクトリを再読込
-                    UpdatePictureContentsList();
+                    // Exif情報を削除して画像を保存
+                    if (ImageFileControl.DeleteExifInfoAndSaveFile(_filePath))
+                    {
+                        // Exif情報を削除した画像を保存後、現在のディレクトリを再読込
+                        UpdatePictureContentsList();
+                    }
+                }
+                else
+                {
+                    App.ShowErrorMessageBox("ファイルはロックされています", "ファイルアクセスエラー");
+                    return;
                 }
             }
-            else
+            catch (Exception _ex)
             {
-                MessageBox.Show("ファイルはロックされています", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                App.LogException(_ex);
+                App.ShowErrorMessageBox("ファイル保存時に発生しました。", "ファイル保存エラー");
             }
         }
 

@@ -10,24 +10,23 @@ using Microsoft.Win32;
 namespace PhotoViewer.Model
 {
     public static class ImageFileControl
-    {  
+    {
+        // デフォルトパスの設定
+        private static readonly string DEFAULT_PICTURE_PATH = Environment.GetFolderPath(Environment.SpecialFolder.CommonPictures);
+
         /// <summary>
         /// ObservableCollectionにフォルダ内に存在する画像ファイルのリストを保存するメソッド
         /// </summary>
-        /// <return>選択したフォルダパスを返す</return>
-        static public string OpenDirectory()
+        /// <return>選択したフォルダパスを返す(キャンセルした場合はnullを返す)</return>
+        public static string GetFolderInDirectory ()
         {
-            string _selectedFolderPath = "";
-
+            string _selectedFolderPath = null;
             var dialog = new CommonOpenFileDialog();
 
             // フォルダ選択ダイアログの設定
-            const string FolderDialogTitle = "フォルダ選択ダイアログ";
-            dialog.Title = FolderDialogTitle;
-            dialog.EnsureReadOnly = false;
-            dialog.AllowNonFileSystemItems = false;
+            dialog.Title = "フォルダ選択";
             dialog.IsFolderPicker = true;
-            dialog.DefaultDirectory = Environment.GetFolderPath(System.Environment.SpecialFolder.CommonPictures);
+            dialog.DefaultDirectory = DEFAULT_PICTURE_PATH;
 
             // フォルダ選択ダイアログの表示
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
@@ -39,65 +38,136 @@ namespace PhotoViewer.Model
         }
 
         /// <summary>
-        /// 画像を開くメソッド
+        /// 該当のメディアファイルからExif情報を削除する
+        /// </summary>
+        /// <param name="_filePath">ファイルパス</param>
+        /// <returns></returns>
+        public static bool DeleteExifInfoAndSaveFile(string _filePath)
+        {
+            string _outFilePath = "";
+            if (ShowSaveDialog(_filePath, out _outFilePath))
+            {
+                BitmapSource _bitmapSource = null;
+
+                // 保存ダイアログで保存を押下したとき
+                try
+                {
+                    // 保存したい画像をBitmapSourceで読み込む
+                    _bitmapSource = CreateBitmapSourceFromFile(_filePath);
+
+                    // 保存したい画像の読み込み失敗時はエラーとして返す
+                    if (_bitmapSource == null)
+                    {
+                        return false;
+                    }
+
+                    // 品質と出力拡張子の設定
+                    int _quality = 80;  // デフォルトは標準画質で設定
+                    string _outExtension = Path.GetExtension(_outFilePath).ToLower();
+
+                    // Bitmap画像の保存
+                    return SaveBitmapImage(_bitmapSource, _outExtension, _outFilePath, _quality);
+                }
+                catch
+                {
+                    _bitmapSource = null;
+
+                    // 保存途中のファイルを削除
+                    try
+                    {
+                        if (File.Exists(_outFilePath))
+                        {
+                            File.Delete(_outFilePath);
+                        }
+                    }
+                    catch { }   // エラー時なので例外は握りつぶす
+                    throw new FieldAccessException();
+                }
+                finally
+                {
+                    // 強制メモリ解放
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
+                }
+            }
+
+            // 保存キャンセル時
+            return false;
+        }
+
+        /// <summary>
+        /// 拡大表示する画像を作成する
         /// </summary>
         /// <param name="_filePath">画像ファイルのパス</param>
         public static BitmapSource CreateViewImage(string _filePath)
         {
+            // 読み込む画像が縦長か横長かスクエアか確認(読み込む画像の幅、高さも取得)
+            //
+            int _sourceImageWidth = 1;  // 読み込む画像の幅
+            int _sourceImageHeight = 1; // 読み込む画像の高さ
+            MediaContentChecker.PictureType _pictureType = MediaContentChecker.CheckPictureType(_filePath, out _sourceImageWidth, out _sourceImageHeight);
+
+            // 画像の読み込み
             using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
             {
                 BitmapSource _bitmapSource = null;
+                string _extension = Path.GetExtension(_filePath).ToLower();
 
-                // Not Raw image case
-                if (Path.GetExtension(_filePath).ToLower() != ".nef" && Path.GetExtension(_filePath).ToLower() != ".dng")
+                // 表示領域のサイズ
+                const int _viewWidth = 880;
+                const int _viewHeight = 660;
+
+                try
                 {
-                    var _bitmapImage = new BitmapImage();
-                    _bitmapImage.BeginInit();
-                    _bitmapImage.StreamSource = _stream;
-                    _bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                    _bitmapImage.CreateOptions = BitmapCreateOptions.None;
-                    _bitmapImage.EndInit();
+                    if (!MediaContentChecker.CheckRawImageExtensions(_extension))
+                    {
+                        // Not Raw image case
+                        // BitmapImageをデコードする(画像作成)
+                        var _bitmapImage = CreateViewImageFromStream(_stream, _pictureType, _sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight);
 
-                    // 画像からメタデータを取得する
-                    _stream.Position = 0;
-                    var _metaData = (BitmapFrame.Create(_stream).Metadata) as BitmapMetadata;
+                        // 画像からメタデータを取得する
+                        _stream.Position = 0;
+                        var _metaData = (BitmapFrame.Create(_stream).Metadata) as BitmapMetadata;
+                        _stream.Close();
+
+                        // 画像を回転する
+                        _bitmapSource = RotateBitmapSource(_metaData, _bitmapImage);
+                    }
+                    else
+                    {
+                        // Raw Image case
+                        // Bitmapデコーダで画像を読み込む
+                        BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.OnDemand);
+                        _bitmapSource = _bmpDecoder.Frames[0];
+
+                        // 表示領域より大きな画像を読み込む場合(880x660に合うようにリサイズし直す)
+                        if (!CheckPictureSize(_sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight))
+                        {
+                            _bitmapSource = CreateResizeImage(_bitmapSource, _viewWidth, _viewHeight);
+                        }
+                    }
+
+                    // BitmapSourceを凍結
+                    _bitmapSource.Freeze();
+                }
+                catch (Exception _ex)
+                {
+                    App.LogException(_ex);
+                    App.ShowErrorMessageBox("画像の読み込みに失敗しました。", "画像読み込みエラー");
+
+                    // 後処理
                     _stream.Close();
-
-                    // 画像を回転する
-                    _bitmapSource = RotateBitmapSource(_metaData, _bitmapImage);
+                    _bitmapSource = null;
+                    return _bitmapSource;
                 }
-                else
-                {
-                    // Raw Image case
-                    BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
-                    _bitmapSource = _bmpDecoder.Frames[0];
-                }
-
-                // 表示する画像を生成する
-                const uint _maxContentsWidth = 880;
-                const uint _maxContentsHeight = 660;
-                _bitmapSource = CreateResizeImage(_bitmapSource, _maxContentsWidth, _maxContentsHeight);
-                _bitmapSource.Freeze();
 
                 return _bitmapSource;
             }
         }
 
         /// <summary>
-        /// 画像を回転するメソッド
-        /// </summary>
-        private static BitmapSource TransformBitmap(BitmapSource source, Transform transform)
-        {
-            var result = new TransformedBitmap();
-            result.BeginInit();
-            result.Source = source;
-            result.Transform = transform;
-            result.EndInit();
-            return result;
-        }
-
-        /// <summary>
-        /// サムネイル画像を作成するメソッド
+        /// サムネイル画像を作成する
         /// </summary>
         public static BitmapSource CreateThumnailImage(string _filePath)
         {
@@ -115,19 +185,149 @@ namespace PhotoViewer.Model
                 }
 
                 // Rawファイル以外はサムネイル画像を回転する
-                if (Path.GetExtension(_filePath).ToLower() != ".nef" && Path.GetExtension(_filePath).ToLower() != ".dng")
+                string _extension = Path.GetExtension(_filePath).ToLower();
+                if (!MediaContentChecker.CheckRawImageExtensions(_extension))
                 {
                     _thumbnailSource = RotateBitmapSource(_metaData, _thumbnailSource);
                 }
 
                 // サムネイル画像を生成する(100x75以上のものはこのサイズに収まるように縮小)
-                const uint _maxContentsWidth = 100;
-                const uint _maxContentsHeight = 75;
-                _thumbnailSource = CreateResizeImage(_thumbnailSource, _maxContentsWidth, _maxContentsHeight);
+                const int _maxContentsWidth = 100;
+                const int _maxContentsHeight = 75;
+                if (!CheckPictureSize(_thumbnailSource.PixelWidth, _thumbnailSource.PixelHeight, _maxContentsWidth, _maxContentsHeight))
+                {
+                    _thumbnailSource = CreateResizeImage(_thumbnailSource, _maxContentsWidth, _maxContentsHeight);
+                }
+
+                // BitmapSourceを凍結
                 _thumbnailSource.Freeze();
 
                 return _thumbnailSource;
             }
+        }
+
+        /// <summary>
+        /// ファイルからBitmapSourceを取得する
+        /// </summary>
+        /// <param name="_filePath">ファイルパス</param>
+        /// <returns>ファイルから得られたBitmapSource</returns>
+        private static BitmapSource CreateBitmapSourceFromFile(string _filePath)
+        {
+            BitmapSource _bitmapSource = null;
+
+            try
+            {
+                using (var _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
+                {
+                    string _extension = Path.GetExtension(_filePath).ToLower();
+                    if (!MediaContentChecker.CheckRawImageExtensions(_extension))
+                    {
+                        // Not Raw image case
+                        var _bitmapImage = new BitmapImage();
+                        _bitmapImage.BeginInit();
+                        _bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                        _bitmapImage.CreateOptions = BitmapCreateOptions.None;
+                        _bitmapImage.StreamSource = _stream;
+                        _bitmapImage.EndInit();
+                        _bitmapSource = _bitmapImage;
+                    }
+                    else
+                    {
+                        // Raw Image case
+                        // Bitmapデコーダで画像を読み込む
+                        BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.OnDemand);
+                        _bitmapSource = _bmpDecoder.Frames[0];
+                        _bitmapSource = new WriteableBitmap(_bitmapSource);
+                    }
+
+                    // BitmapSourceを凍結
+                    _bitmapSource.Freeze();
+                }
+
+                return _bitmapSource;
+            }
+            catch (Exception)
+            {
+                // 後始末
+                _bitmapSource = null;
+                throw new FileNotFoundException();
+            }
+        }
+
+        /// <summary>
+        /// 表示領域に合ったBitmapImageを作成する
+        /// </summary>
+        /// <param name="_stream">読み込む画像のストリーム</param>
+        /// <param name="_pictureType">読み込む画像のタイプ</param>
+        /// <param name="_sourceWidth">読み込む画像の幅</param>
+        /// <param name="_sourceHeight">読み込む画像の高さ</param>
+        /// <param name="_viewWidth">表示領域の幅</param>
+        /// <param name="_viewHeight">表示領域の高さ</param>
+        /// <returns></returns>
+        private static BitmapImage CreateViewImageFromStream(MemoryStream _stream, MediaContentChecker.PictureType _pictureType, int _sourceWidth, int _sourceHeight, int _viewWidth, int _viewHeight)
+        {
+            var _bitmapImage = new BitmapImage();
+
+            try
+            {
+                _bitmapImage.BeginInit();
+                _bitmapImage.StreamSource = _stream;
+
+                // 表示領域より大きな画像を読み込む場合
+                if (!CheckPictureSize(_sourceWidth, _sourceHeight, _viewWidth, _viewHeight))
+                {
+                    // 読み込む画像が縦長か横長かスクエアであるかによって、Decode制限を決める
+                    switch (_pictureType)
+                    {
+                        case MediaContentChecker.PictureType.Horizontal:
+                            _bitmapImage.DecodePixelWidth = _viewWidth;
+                            break;
+                        case MediaContentChecker.PictureType.Vertical:
+                        case MediaContentChecker.PictureType.Square:
+                            _bitmapImage.DecodePixelHeight = _viewHeight;
+                            break;
+                        case MediaContentChecker.PictureType.Unknown:
+                        default:
+                            // Todo エラー処理する必要あり。
+                            break;
+                    }
+                }
+
+                _bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                _bitmapImage.CreateOptions = BitmapCreateOptions.None;
+                _bitmapImage.EndInit();
+            }
+            catch (Exception)
+            {
+                _bitmapImage = null;    // エラー時はリセット
+                throw new OutOfMemoryException();
+            }
+
+            return _bitmapImage;
+        }
+
+        /// <summary>
+        /// BitmapSourceをリサイズする
+        /// </summary>
+        /// <param name="_source">Bitmapで読み込んだ画像情報</param>
+        /// <param name="_maxWidth">リサイズする最大幅</param>
+        /// <param name="_maxHeight">リサイズする最大高さ</param>
+        /// <returns>リサイズ後のBitmapSourceを返す</returns>
+        private static BitmapSource CreateResizeImage(BitmapSource _source, int _maxWidth, int _maxHeight)
+        {
+            // 縮小率を求める
+            double _scaleX = (double)_maxWidth / _source.PixelWidth;
+            double _scaleY = (double)_maxHeight / _source.PixelHeight;
+            double _scale = Math.Min(_scaleX, _scaleY);
+
+            // 縮小されたBitmapを作成
+            var _transformedBitmap = new TransformedBitmap();
+            _transformedBitmap.BeginInit();
+            _transformedBitmap.Source = _source;
+            _transformedBitmap.Transform = new ScaleTransform(_scale, _scale);
+            _transformedBitmap.EndInit();
+
+            return new WriteableBitmap(_transformedBitmap);
         }
 
         /// <summary>
@@ -164,158 +364,31 @@ namespace PhotoViewer.Model
         }
 
         /// <summary>
-        /// 画像を保存するメソッド
+        /// 画像を回転するメソッド
         /// </summary>
-        public static bool SaveImageFile(Bitmap _bitmap, string _path)
+        private static BitmapSource TransformBitmap(BitmapSource source, Transform transform)
         {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.InitialDirectory = System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonPictures);
-            sfd.Filter = "画像ファイル|*.jpg; *.png; *.bmp; *.gif; *.tiff";
-            sfd.FileName = Path.GetFileName(_path);
-            sfd.FilterIndex = 1;
-            sfd.Title = "保存先のファイルを選択してください";
-            sfd.RestoreDirectory = true;
-            sfd.OverwritePrompt = true;
-            sfd.CheckPathExists = true;
-
-            //ダイアログを表示する
-            if (sfd.ShowDialog() == true)
-            {
-                string _filePath = sfd.FileName;
-                string _extension = Path.GetExtension(_filePath).ToLower();
-
-                // Bitmap画像を保存する
-                SaveBitmapImage(_bitmap, _extension, _filePath);
-                
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            var result = new TransformedBitmap();
+            result.BeginInit();
+            result.Source = source;
+            result.Transform = transform;
+            result.EndInit();
+            return result;
         }
 
         /// <summary>
-        /// ビットマップ画像を保存する
+        /// ソースとなる画像のサイズをチェックするメソッド
         /// </summary>
-        /// <param name="_bitmap">保存する画像</param>
-        /// <param name="_extension">保存するファイル拡張子</param>
-        /// <param name="_filePath">保存するファイルパス</param>
-        private static void SaveBitmapImage(Bitmap _bitmap, string _extension,  string _filePath)
-        {
-            if (_extension == ".jpg")
-            {
-                // Jpegファイルで保存する場合
-                Bitmap _saveBitmap = new Bitmap(_bitmap);
-
-                // Qualityの設定
-                const long _quality = 90;
-                System.Drawing.Imaging.EncoderParameters _eps = new System.Drawing.Imaging.EncoderParameters(1);
-                System.Drawing.Imaging.EncoderParameter _ep = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, _quality);
-                _eps.Param[0] = _ep;
-
-                // エンコーダに関する情報を取得
-                System.Drawing.Imaging.ImageCodecInfo ici = GetEncoderInfo(System.Drawing.Imaging.ImageFormat.Jpeg);
-
-                _saveBitmap.Save(_filePath, ici, _eps);
-
-                // クリア
-                _saveBitmap.Dispose();
-                _eps.Dispose();
-            }
-            else if (_extension == ".png")
-            {
-                // Pngファイルで保存する場合
-                Bitmap _saveBitmap = new Bitmap(_bitmap);
-                _saveBitmap.Save(_filePath, System.Drawing.Imaging.ImageFormat.Png);
-
-                // クリア
-                _saveBitmap.Dispose();
-            }
-            else if (_extension == ".bmp")
-            {
-                // Bmpファイルで保存する場合
-                Bitmap _saveBitmap = new Bitmap(_bitmap);
-                _saveBitmap.Save(_filePath, System.Drawing.Imaging.ImageFormat.Bmp);
-
-                // クリア
-                _saveBitmap.Dispose();
-            }
-            else if (_extension == ".gif")
-            {
-                // Gifファイルで保存する場合
-                Bitmap _saveBitmap = new Bitmap(_bitmap);
-                _saveBitmap.Save(_filePath, System.Drawing.Imaging.ImageFormat.Gif);
-
-                // クリア
-                _saveBitmap.Dispose();
-            }
-            else
-            {
-                // Tiffファイルで保存する場合
-                Bitmap _saveBitmap = new Bitmap(_bitmap);
-                _saveBitmap.Save(_filePath, System.Drawing.Imaging.ImageFormat.Tiff);
-
-                // クリア
-                _saveBitmap.Dispose();
-            }
-        }
-
-        /// <summary>
-        /// ImageFormatで指定されたImageCodecInfoを探して返す
-        /// </summary>
-        private static System.Drawing.Imaging.ImageCodecInfo GetEncoderInfo(System.Drawing.Imaging.ImageFormat f)
-        {
-            System.Drawing.Imaging.ImageCodecInfo[] encs = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders();
-            foreach (System.Drawing.Imaging.ImageCodecInfo enc in encs)
-            {
-                if (enc.FormatID == f.Guid)
-                {
-                    return enc;
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// アスペクト比を維持して最大のサイズに合うようにリサイズする幅と高さを算出するメソッド
-        /// </summary>
-        /// <param name="_source">Bitmap画像</param>
+        /// <param name="_sourceWidth">ソース画像の幅</param>
+        /// <param name="_sourceHeight">ソース画像の高さ</param>
         /// <param name="_maxWidth">最大幅</param>
         /// <param name="_maxHeight">最大高さ</param>
-        /// <param name="_resizeWidth">リサイズ後の幅</param>
-        /// <param name="_resizeHeight">リサイズ後の高さ</param>
-        public static void GetAspectScale(BitmapSource _source, int _maxWidth, int _maxHeight, ref int _resizeWidth, ref int _resizeHeight)
+        /// <returns>最大幅、最大高さよりSourceとなる画像のサイズが大きい場合はFalseを返す</returns>
+        private static bool CheckPictureSize(int _sourceWidth, int _sourceHeight, int _maxWidth, int _maxHeight)
         {
-            if ((double)_maxWidth / _maxHeight > (double)_source.PixelWidth / _source.PixelHeight)
-            {
-                // 画像が縦長なら縦方向いっぱいに表示するようにリサイズ
-                _resizeHeight = _maxHeight;
-                _resizeWidth = _resizeHeight * _source.PixelWidth / _source.PixelHeight;
-            }
-            else
-            {
-                // 画像が横長なら横方向いっぱいに表示するようにリサイズ
-                _resizeWidth = _maxWidth;
-                _resizeHeight = _resizeWidth * _source.PixelHeight / _source.PixelWidth;
-            }
-        }
-
-        /// <summary>
-        /// Bitmap画像の画像サイズをチェックするメソッド
-        /// </summary>
-        /// <param name="_source">Bitmap画像</param>
-        /// <param name="_maxWidth">最大幅</param>
-        /// <param name="_maxHeight">最大高さ</param>
-        /// <returns>最大幅、最大高さよりBitmap画像のサイズが大きい場合はFalseを返す</returns>
-        public static bool CheckPictureSize(BitmapSource _source, uint _maxWidth, uint _maxHeight)
-        {
-            uint _sourceWidth = (uint)_source.PixelWidth;
-            uint _sourceHeigth = (uint)_source.PixelHeight;
-
             bool _isSmaller = true;
 
-            if(_sourceWidth > _maxWidth || _sourceHeigth > _maxHeight)
+            if (_sourceWidth > _maxWidth || _sourceHeight > _maxHeight)
             {
                 _isSmaller = false;
             }
@@ -324,54 +397,127 @@ namespace PhotoViewer.Model
         }
 
         /// <summary>
-        /// BitmapImageをリサイズするメソッド
+        /// ビットマップ画像を指定した拡張子のファイルに保存する
         /// </summary>
-        /// <param name="_source">Bitmapで読み込んだ画像情報</param>
-        /// <param name="_maxWidth">リサイズする最大幅</param>
-        /// <param name="_maxHeight">リサイズする最大高さ</param>
-        /// <returns>リサイズ後のBitmapImageを返す</returns>
-        private static BitmapSource ResizeImage(BitmapSource _source, int _maxWidth, int _maxHeight)
+        /// <param name="_bitmap">保存する画像</param>
+        /// <param name="_extension">保存するファイル拡張子</param>
+        /// <param name="_filePath">保存するファイルパス</param>
+        /// <returns>保存に成功したかどうか</returns>
+        private static bool SaveBitmapImage(BitmapSource _bitmapSource, string _extension, string _filePath, int _quality)
         {
-            // 縮小率を求める
-            double _scaleX = (double)_maxWidth / _source.PixelWidth;
-            double _scaleY = (double)_maxHeight / _source.PixelHeight;
-            double _scale = Math.Min(_scaleX, _scaleY);
-
-            // 縮小されたBitmapを作成
-            var _transformedBitmap = new TransformedBitmap();
-            _transformedBitmap.BeginInit();
-            _transformedBitmap.Source = _source;
-            _transformedBitmap.Transform = new ScaleTransform(_scale, _scale);
-            _transformedBitmap.EndInit();
-
-            BitmapSource _resizeImageSource = new WriteableBitmap(_transformedBitmap);
-
-            return _resizeImageSource;
-        }
-
-        /// <summary>
-        /// 画像のファイルパスからViewに対応のResizeした画像を出力するメソッド
-        /// </summary>
-        /// <param name="_filePath">画像のファイルパス</param>
-        /// <returns>作成したBitmap画像のSourceを返す</returns>
-        public static BitmapSource CreateResizeImage(BitmapSource _openImage, uint _maxContentsWidth, uint _maxContentsHeight)
-        {
-            if(! CheckPictureSize(_openImage, _maxContentsWidth, _maxContentsHeight))
+            // Jpegファイルで保存する場合
+            if (_extension == ".jpg")
             {
-                _openImage = ResizeImage(_openImage, (int)_maxContentsWidth, (int)_maxContentsHeight);
+                using (FileStream _stream = new FileStream(_filePath, FileMode.Create, FileAccess.Write))
+                {
+                    var _encoder = new JpegBitmapEncoder()
+                    {
+                        QualityLevel = _quality    // 保存時の品質を設定
+                    };
+
+                    _encoder.Frames.Add(BitmapFrame.Create(_bitmapSource));
+                    _encoder.Save(_stream);
+                }
+
+                return true;
             }
-            
-            return _openImage;
+
+            // Pngファイルで保存する場合
+            if (_extension == ".png")
+            {
+                using (FileStream _stream = new FileStream(_filePath, FileMode.Create, FileAccess.Write))
+                {
+                    var _encoder = new PngBitmapEncoder();
+
+                    _encoder.Frames.Add(BitmapFrame.Create(_bitmapSource));
+                    _encoder.Save(_stream);
+                }
+
+                return true;
+            }
+
+            // Bmpファイルで保存する場合
+            if (_extension == ".bmp")
+            {
+                using (FileStream _stream = new FileStream(_filePath, FileMode.Create, FileAccess.Write))
+                {
+                    var _encoder = new BmpBitmapEncoder();
+
+                    _encoder.Frames.Add(BitmapFrame.Create(_bitmapSource));
+                    _encoder.Save(_stream);
+                }
+
+                return true;
+            }
+
+            // Gifファイルで保存する場合
+            if (_extension == ".gif")
+            {
+                using (FileStream _stream = new FileStream(_filePath, FileMode.Create, FileAccess.Write))
+                {
+                    var _encoder = new GifBitmapEncoder();
+
+                    _encoder.Frames.Add(BitmapFrame.Create(_bitmapSource));
+                    _encoder.Save(_stream);
+                }
+
+                return true;
+            }
+
+            // Tiffファイルで保存する場合
+            if (_extension == ".tif")
+            {
+                using (FileStream _stream = new FileStream(_filePath, FileMode.Create, FileAccess.Write))
+                {
+                    var _encoder = new TiffBitmapEncoder();
+
+                    _encoder.Frames.Add(BitmapFrame.Create(_bitmapSource));
+                    _encoder.Save(_stream);
+                }
+
+                return true;
+            }
+
+            // 保存失敗時
+            return false;
         }
 
         /// <summary>
-        /// MediaInfoからExif情報を削除するメソッド
+        /// 保存ダイアログを表示する
         /// </summary>
-        /// <param name="_info"></param>
-        public static bool DeleteExifInfo(string _filePath)
+        /// <param name="_path">保存したいファイルのパス</param>
+        /// <param name="_outFilePath">保存ダイアログで設定した保存用のファイルパス</param>
+        /// <returns>保存する場合はTrue、保存キャンセルはFalseを返す</returns>
+        private static bool ShowSaveDialog(string _path, out string _outFilePath)
         {
-            Bitmap _bitmap = new Bitmap(_filePath);
-            return SaveImageFile(_bitmap, _filePath);
+            CommonSaveFileDialog _sfd = new CommonSaveFileDialog();
+
+            // 保存ダイアログの設定
+            _sfd.InitialDirectory = DEFAULT_PICTURE_PATH;
+            _sfd.DefaultFileName = Path.GetFileName(_path);
+            _sfd.Title = "保存先のファイルを選択してください";
+
+            // 保存できる拡張子
+            _sfd.Filters.Add(new CommonFileDialogFilter("Jpegファイル", ".jpg"));
+            _sfd.Filters.Add(new CommonFileDialogFilter("Pngファイル", ".png"));
+            _sfd.Filters.Add(new CommonFileDialogFilter("Bmpファイル", ".bmp"));
+            _sfd.Filters.Add(new CommonFileDialogFilter("Gifファイル", ".gif"));
+            _sfd.Filters.Add(new CommonFileDialogFilter("Tiffファイル", ".tif"));
+
+            // デフォルトの拡張子の設定
+            _sfd.AlwaysAppendDefaultExtension = true;
+            _sfd.DefaultExtension = ".jpg";    // デフォルトはJpegファイルを指定
+
+            // 保存ダイアログを表示
+            if (_sfd.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                _outFilePath = _sfd.FileAsShellObject.ParsingName;
+                return true;
+            }
+
+            // 保存ダイアログでキャンセルした場合
+            _outFilePath = "";
+            return false;
         }
     }
 }
