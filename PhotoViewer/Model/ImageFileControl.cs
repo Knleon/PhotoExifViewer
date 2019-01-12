@@ -1,11 +1,8 @@
 ﻿using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
-using System.Drawing;
 using System.IO;
-using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Microsoft.Win32;
 
 namespace PhotoViewer.Model
 {
