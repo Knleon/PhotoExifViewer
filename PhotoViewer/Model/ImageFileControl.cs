@@ -140,12 +140,12 @@ namespace PhotoViewer.Model
                         // Bitmapデコーダで画像を読み込む
                         BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.OnDemand);
                         _bitmapSource = _bmpDecoder.Frames[0];
+                    }
 
-                        // 表示領域より大きな画像を読み込む場合(880x660に合うようにリサイズし直す)
-                        if (!CheckPictureSize(_sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight))
-                        {
-                            _bitmapSource = CreateResizeImage(_bitmapSource, _viewWidth, _viewHeight);
-                        }
+                    // 表示領域より大きな画像がある場合(880x660に合うようにリサイズし直す)
+                    if (!CheckPictureSize(_sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight))
+                    {
+                        _bitmapSource = CreateResizeImage(_bitmapSource, _viewWidth, _viewHeight);
                     }
 
                     // BitmapSourceを凍結
