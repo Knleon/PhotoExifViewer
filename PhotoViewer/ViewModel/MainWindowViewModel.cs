@@ -488,18 +488,19 @@ namespace PhotoViewer.ViewModel
         {
             try
             {
-                LoadPictureContentsWorker(_sender, _args);
+                LoadContentsWorker(_sender, _args);
             }
             catch (Exception _ex)
             {
                 App.LogException(_ex);
+                App.ShowErrorMessageBox("メディアの読み込みに失敗しました。", "読み込みエラー");
             }
         }
 
         /// <summary>
         /// 静止画を読み込む
         /// </summary>
-        private void LoadPictureContentsWorker(object _sender, DoWorkEventArgs _args)
+        private void LoadContentsWorker(object _sender, DoWorkEventArgs _args)
         {
             List<string> _filePathsList = new List<string>();
 
@@ -581,6 +582,7 @@ namespace PhotoViewer.ViewModel
             if(LoadPictureContentsBackgroundWorker_Reload)
             {
                 LoadPictureContentsBackgroundWorker_Reload = false;
+
                 // 別スレッドでピクチャコンテンツの更新
                 LoadPictureContentsList();
             }
@@ -658,7 +660,7 @@ namespace PhotoViewer.ViewModel
                     LoadViewImageSource(SelectedPictureContent);
                     break;
                 case MediaContentInfo.MediaType.MOVIE:
-                    // Todo:いずれ追加
+                    // Todo: いずれ追加
                     break;
                 case MediaContentInfo.MediaType.UNKNOWN:
                 default:
@@ -763,6 +765,7 @@ namespace PhotoViewer.ViewModel
                 catch (Exception _ex)
                 {
                     App.LogException(_ex);
+                    App.ShowErrorMessageBox("ファイルの削除でエラーが発生しました。", "ファイル削除エラー");
                 }
             }
             else

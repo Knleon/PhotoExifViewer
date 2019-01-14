@@ -78,7 +78,7 @@ namespace PhotoViewer.Model
                         }
                     }
                     catch { }   // エラー時なので例外は握りつぶす
-                    throw new FieldAccessException();
+                    throw new FileLoadException();
                 }
                 finally
                 {
