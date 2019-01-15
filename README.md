@@ -12,7 +12,10 @@ Exif情報と写真閲覧、Exif情報の削除などが行えます。
 https://downloadcenter.nikonimglib.com/ja/products/170/NEF_Codec.html
 
 ## アプリの動作
-Exif情報や写真の閲覧ができます。また、Exif情報の削除なども行えます。
+Exif情報や写真の閲覧ができます。
+
+また、Exif情報の削除なども行えます。
+
 設定画面で設定した他のアプリを起動することも可能です。
 
 ## 使用しているテクノロジ
