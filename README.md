@@ -1,7 +1,6 @@
-﻿PhotoExifViewer@KLeon について
-====
+﻿# PhotoExifViewer
 
-PhotoExifViewer@KLeon はKLeonオリジナルのフォトビューワーです。
+KLeonオリジナルのフォトビューワーです。
 
 Exif情報と写真閲覧、Exif情報の削除などが行えます。
 
