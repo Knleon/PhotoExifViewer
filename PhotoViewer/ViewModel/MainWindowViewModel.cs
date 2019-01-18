@@ -173,7 +173,7 @@ namespace PhotoViewer.ViewModel
             // ExtraAppSettingCollectionが取得できている場合は、それも追加
             UpdateContextMenuFromExtraAppSetting(ExtraAppSettingCollection);
 
-            // 連携アプリ設定g画面からのEvent設定
+            // 連携アプリ設定画面からのEvent設定
             LinkageProgramViewModel.LinkageEvent += UpdateLinkageContents;
             LinkageProgramViewModel.DeleteAppEvent += DeleteLinkageContents;
             LinkageProgramViewModel.AllDeleteEvent += AllDeleteLinkageContents;
@@ -675,6 +675,8 @@ namespace PhotoViewer.ViewModel
         /// <param name="_info">拡大表示するメディア情報</param>
         public async void LoadViewImageSource(PictureMediaContent _info)
         {
+            Mouse.OverrideCursor = Cursors.Wait;
+
             // 画像を表示
             IsReadMedia = true;
             await Task.Run(() => SetPictureAndExifInfo(_info));
@@ -683,6 +685,8 @@ namespace PhotoViewer.ViewModel
             // SaveButtonとExifDeleteButtonの有効化
             const bool IsEnableFlag = true;
             SetIsEnableButton(IsEnableFlag);
+
+            Mouse.OverrideCursor = Cursors.Arrow;
         }
 
         /// <summary>

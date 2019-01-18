@@ -6,26 +6,29 @@ using System.Windows.Media.Imaging;
 
 namespace PhotoViewer.Model
 {
-    class WindowsIconCreator
+    /// <summary>
+    /// Windows APIを用いて、アイコンを取得するクラス
+    /// </summary>
+    public static class WindowsIconCreator
     {
         [DllImport("Shell32.dll")]
         public static extern int ExtractIconEx(
-        string szFile,      // アイコンを抽出するファイル名
-        int nIconIndex,  // 取り出すアイコンのインデックス 
+        string szFile,          // アイコンを抽出するファイル名
+        int nIconIndex,         // 取り出すアイコンのインデックス 
         out IntPtr phiconLarge, // 大きなアイコンへのポインタ（通常 32x32）
         out IntPtr phiconSmall, // 小さなアイコンへのポインタ（通常 16x16）
-        int nIcons       // 取り出すアイコン数
+        int nIcons              // 取り出すアイコン数
+        );
+
+        [DllImport("Shell32.dll", CharSet = CharSet.Unicode)]
+        public static extern IntPtr SHGetStockIconInfo(
+            StockIconId siid,       // 取得するアイコンの IDを指定する StockIconId enum 型
+            StockIconFlags uFlags,  // 取得するアイコンの種類を指定する StockIconFlags enum 型
+            ref StockIconInfo psii  //（戻り値）StockIconInfo 型
         );
 
         [DllImport("User32.dll")]
         public static extern bool DestroyIcon(IntPtr hIcon);
-
-        [DllImport("Shell32.dll", CharSet = CharSet.Unicode)]
-        public static extern IntPtr SHGetStockIconInfo(
-            StockIconId siid,   // 取得するアイコンの IDを指定する StockIconId enum 型
-            StockIconFlags uFlags, // 取得するアイコンの種類を指定する StockIconFlags enum 型
-            ref StockIconInfo psii    //（戻り値）StockIconInfo 型
-        );
 
         [StructLayoutAttribute(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct StockIconInfo
@@ -38,18 +41,19 @@ namespace PhotoViewer.Model
             public string szPath;      //（戻り値）アイコンリソースを保持するファイル名 
         }
 
-        [Flags]
+        /// <summary>
+        /// 取得するアイコンの種類
+        /// </summary>
         public enum StockIconFlags
         {
             Large = 0x000000000,       // 大きなアイコン
             Small = 0x000000001,       // 小さなアイコン
-            ShellSize = 0x000000004,   // シェルのサイズのアイコン
             Handle = 0x000000100,      // 指定のアイコンのハンドル
-            SystemIndex = 0x000004000, // システムのイメージリストのインデックス
-            LinkOverlay = 0x000008000, // リンクを示すオーバーレイ付きのアイコン
-            Selected = 0x000010000     // 選択状態のアイコン
         }
 
+        /// <summary>
+        /// 取得するアイコンの種類
+        /// </summary>
         public enum StockIconId
         {
             SIID_DOCNOASSOC = 0,
@@ -146,16 +150,16 @@ namespace PhotoViewer.Model
             SIID_MEDIABDRE = 139,
             SIID_CLUSTEREDDRIVE = 140,
         }
-
-        public WindowsIconCreator(){ }
-
+       
         /// <summary>
         /// Windows標準のアイコンを取得するメソッド
         /// </summary>
+        /// <param name="_iconId">取得するアイコンの種類</param>
+        /// <returns>BitmapSourceの画像</returns>
         public static BitmapSource GetWindowsIcon(StockIconId _iconId)
         {
             // 大きなアイコンのハンドルを取得
-            StockIconFlags _flags = StockIconFlags.Handle | StockIconFlags.Large;
+            StockIconFlags _flags = StockIconFlags.Large | StockIconFlags.Handle;
 
             var _info = new StockIconInfo();
             _info.cbSize = (uint)Marshal.SizeOf(typeof(StockIconInfo));
@@ -163,9 +167,22 @@ namespace PhotoViewer.Model
             // BitmapSourceにアイコンを保存
             BitmapSource _source = null;
             IntPtr _result = SHGetStockIconInfo(_iconId, _flags, ref _info);
-            if(_info.hIcon != IntPtr.Zero)
+
+            try
             {
-                _source = Imaging.CreateBitmapSourceFromHIcon(_info.hIcon, Int32Rect.Empty, null);
+                if (_info.hIcon != IntPtr.Zero)
+                {
+                    _source = Imaging.CreateBitmapSourceFromHIcon(_info.hIcon, Int32Rect.Empty, null);
+                }
+            }
+            catch(Exception _ex)
+            {
+                // ログだけ出力して終了
+                App.LogException(_ex);
+            }
+            finally
+            {
+                // アイコンを破棄
                 DestroyIcon(_info.hIcon);
             }
 
