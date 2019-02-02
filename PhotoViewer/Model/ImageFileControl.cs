@@ -1,4 +1,5 @@
 ﻿using Microsoft.WindowsAPICodePack.Dialogs;
+using Microsoft.WindowsAPICodePack.Shell;
 using System;
 using System.IO;
 using System.Windows.Media;
@@ -164,9 +165,11 @@ namespace PhotoViewer.Model
         }
 
         /// <summary>
-        /// サムネイル画像を作成する
+        /// ピクチャコンテンツのサムネイル画像を作成する
         /// </summary>
-        public static BitmapSource CreateThumnailImage(string _filePath)
+        /// <param name="_filePath">ファイルパス</param>
+        /// <returns>ビットマップ画像</returns>
+        public static BitmapSource CreatePictureThumnailImage(string _filePath)
         {
             using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
             {
@@ -201,6 +204,30 @@ namespace PhotoViewer.Model
 
                 return _thumbnailSource;
             }
+        }
+
+        /// <summary>
+        /// ビデオコンテンツのサムネイル画像を作成する
+        /// </summary>
+        /// <param name="_filePath">ファイルパス</param>
+        /// <returns>ビットマップ画像</returns>
+        public static BitmapSource CreateMovieThumbnailImage(string _filePath)
+        {
+            ShellFile _shellFile = ShellFile.FromFilePath(_filePath);
+            BitmapSource _thumbnailSource = _shellFile.Thumbnail.BitmapSource;
+
+            // サムネイル画像を生成する(100x75以上のものはこのサイズに収まるように縮小)
+            const int _maxContentsWidth = 100;
+            const int _maxContentsHeight = 75;
+            if (!CheckPictureSize(_thumbnailSource.PixelWidth, _thumbnailSource.PixelHeight, _maxContentsWidth, _maxContentsHeight))
+            {
+                _thumbnailSource = CreateResizeImage(_thumbnailSource, _maxContentsWidth, _maxContentsHeight);
+            }
+
+            // BitmapSourceを凍結
+            _thumbnailSource.Freeze();
+
+            return _thumbnailSource;
         }
 
         /// <summary>

@@ -117,14 +117,21 @@ namespace PhotoViewer.Model
         public BitmapSource CreateThumbnailImage(MediaContentInfo _info)
         {
             BitmapSource _thumbnailImage = null;
+            string _filePath = _info.FilePath;
+
+            if (_filePath == null || !File.Exists(_filePath))
+            {
+                // 見つからない場合は例外を投げる
+                throw new FileNotFoundException();
+            }
 
             switch (_info.ContentMediaType)
             {
                 case MediaType.PICTURE:
-                    _thumbnailImage = ImageFileControl.CreateThumnailImage(_info.FilePath);
+                    _thumbnailImage = ImageFileControl.CreatePictureThumnailImage(_filePath);
                     break;
                 case MediaType.MOVIE:
-                    // 動画向けにサムネイル画像を生成する必要あり
+                    _thumbnailImage = ImageFileControl.CreateMovieThumbnailImage(_filePath);
                     break;
                 case MediaType.UNKNOWN:
                 default:

@@ -22,12 +22,22 @@ namespace PhotoViewer.ViewModel
         #region Image Binding Parameter
         private BitmapSource _viewImageSource;
         /// <summary>
-        /// メイン画像のイメージソース
+        /// 画像表示部に表示するイメージのBitmapSource
         /// </summary>
         public BitmapSource ViewImageSource
         {
             get { return _viewImageSource; }
             set { SetProperty(ref _viewImageSource, value); }
+        }
+
+        private string _viewMovieSource;
+        /// <summary>
+        /// 動画表示部に表示する動画ソースのURI
+        /// </summary>
+        public string ViewMovieSource
+        {
+            get { return _viewMovieSource; }
+            set { SetProperty(ref _viewMovieSource, value); }
         }
 
         private MediaContentInfo _selectedMediaInfo;
@@ -38,6 +48,16 @@ namespace PhotoViewer.ViewModel
         {
             get { return _selectedMediaInfo; }
             set { SetProperty(ref _selectedMediaInfo, value); }
+        }
+
+        private MediaContentInfo.MediaType _mediaTypeOfSelected;
+        /// <summary>
+        /// 選択されたメディアのタイプ
+        /// </summary>
+        public MediaContentInfo.MediaType MediaTypeOfSelected
+        {
+            get { return _mediaTypeOfSelected; }
+            set { SetProperty(ref _mediaTypeOfSelected, value); }
         }
 
         private PictureMediaContent _selectedPictureContent;
@@ -60,14 +80,14 @@ namespace PhotoViewer.ViewModel
             set { SetProperty(ref _selectedMovieContent, value); }
         }
 
-        private string _selectedPicturePath;
+        private string _selectedPath;
         /// <summary>
         /// 表示中のピクチャのフォルダパス
         /// </summary>
-        public string SelectedPicturePath
+        public string SelectedPath
         {
-            get { return _selectedPicturePath; }
-            set { SetProperty(ref _selectedPicturePath, value); }
+            get { return _selectedPath; }
+            set { SetProperty(ref _selectedPath, value); }
         }
         #endregion
 
@@ -93,11 +113,14 @@ namespace PhotoViewer.ViewModel
         }
         #endregion
 
-        // Commandを定義
+        // コマンドを定義
         public ICommand ReferenceButtonCommand { get; set; }
         public ICommand ExifDeleteButtonCommand { get; set; }
         public ICommand GearButtonCommand { get; set; }
         public ICommand OpenFileExplorerCommand { get; set; }
+
+        // イベントを定義
+        public event EventHandler ChangeSourceEvent;
 
         /// <summary>
         /// コマンドを設定する
@@ -134,15 +157,12 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private Dictionary<string, string> ExtraAppPathDictionary { set; get; }
 
-        /// <summary>
-        /// 以前のディレクトリ保持
-        /// </summary>
+        // 以前のディレクトリ保持
         private string PreviousFilePath { get; set; }
 
-        /// <summary>
-        /// メディアを読み込み中であるかどうかのフラグ
-        /// </summary>
+        // メディアを読み込み中であるかどうかのフラグ
         public bool IsReadMedia { get; set; }
+
 
         /// <summary>
         /// コンストラクタ
@@ -151,7 +171,7 @@ namespace PhotoViewer.ViewModel
         {
             // 変数の初期値を設定
             PreviousFilePath = "";
-            SelectedPicturePath = "";
+            SelectedPath = "";
             IsReadMedia = false;
 
             // コマンドを設定
@@ -181,9 +201,9 @@ namespace PhotoViewer.ViewModel
             // エクスプローラのツリーをデフォルト状態で更新
             UpdateExplorerTreeSource();
 
-            // 別スレッドでピクチャコンテンツの更新(デフォルトパスはPublicユーザーのピクチャーフォルダ)
+            // 別スレッドでコンテンツの更新(デフォルトパスはPublicユーザーのピクチャーフォルダ)
             string _defaultPicturePath = Environment.GetFolderPath(System.Environment.SpecialFolder.CommonPictures);
-            ChangePictureContentsList(_defaultPicturePath);
+            ChangeContentsList(_defaultPicturePath);
         }
 
         /// <summary>
@@ -409,31 +429,31 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// ピクチャコンテンツリストを更新する
+        /// コンテンツリストを更新する
         /// </summary>
         /// <param name="_folder">選択されたフォルダパス</param>
-        private void ChangePictureContentsList(string _folder)
+        private void ChangeContentsList(string _folder)
         {
-            if (_folder == SelectedPicturePath)
+            if (_folder == SelectedPath)
             {
                 // 選択されたフォルダパスが以前のフォルダパスと同じ場合は何もしない
                 return;
             }
 
             // 以前のファイルパスを保持
-            PreviousFilePath = SelectedPicturePath;
+            PreviousFilePath = SelectedPath;
 
             // ファイルパスの更新
-            SelectedPicturePath = _folder;
+            SelectedPath = _folder;
 
-            // ピクチャコンテンツのリスト更新処理
-            UpdatePictureContentsList();
+            // コンテンツのリスト更新処理
+            UpdateContentsList();
         }
 
         /// <summary>
-        /// 別スレッドでピクチャコンテンツの読み込みを行う
+        /// 別スレッドでコンテンツの読み込みを行う
         /// </summary>
-        private void UpdatePictureContentsList()
+        private void UpdateContentsList()
         {
             if (LoadPictureContentsBackgroundWorker != null && LoadPictureContentsBackgroundWorker.IsBusy)
             {
@@ -447,20 +467,20 @@ namespace PhotoViewer.ViewModel
                     return;
                 }
 
-                // 別スレッドでピクチャコンテンツの読み込み
-                LoadPictureContentsList();
+                // 別スレッドでコンテンツの読み込み
+                LoadContentsList();
             }
         }
 
         /// <summary>
-        /// ピクチャコンテンツリストを非同期で取り込む
+        /// コンテンツリストを非同期で取り込む
         /// </summary>
-        private void LoadPictureContentsList()
+        private void LoadContentsList()
         {
-            if (!Directory.Exists(SelectedPicturePath))
+            if (!Directory.Exists(SelectedPath))
             {
                 // パスが見つからなければ以前のパスを指定
-                SelectedPicturePath = PreviousFilePath;
+                SelectedPath = PreviousFilePath;
 
                 // 以前のパスはリセット
                 PreviousFilePath = "";
@@ -515,7 +535,7 @@ namespace PhotoViewer.ViewModel
                     return;
                 }
 
-                string[] _filePaths = Directory.GetFiles(SelectedPicturePath, "*" + _supportExt);
+                var _filePaths = Directory.EnumerateFiles(SelectedPath, "*" + _supportExt);
                 foreach (string _filePath in _filePaths)
                 {
                     _filePathsList.Add(_filePath);
@@ -584,7 +604,7 @@ namespace PhotoViewer.ViewModel
                 LoadPictureContentsBackgroundWorker_Reload = false;
 
                 // 別スレッドでピクチャコンテンツの更新
-                LoadPictureContentsList();
+                LoadContentsList();
             }
         }
 
@@ -607,7 +627,7 @@ namespace PhotoViewer.ViewModel
             }
 
             // ピクチャコンテンツリストを変更
-            ChangePictureContentsList(_openFolderPath);
+            ChangeContentsList(_openFolderPath);
         }
 
         /// <summary>
@@ -620,7 +640,7 @@ namespace PhotoViewer.ViewModel
             SetIsEnableButton(IsEnableFlag);
 
             string _folderPath = _e._directoryPath;
-            ChangePictureContentsList(_folderPath);
+            ChangeContentsList(_folderPath);
         }
 
         /// <summary>
@@ -646,21 +666,33 @@ namespace PhotoViewer.ViewModel
             if (IsFileLocked(_info.FilePath))
             {
                 // ロックされている場合
-                App.ShowErrorMessageBox("ファイルはロックされています", "ファイルアクセスエラー");
+                App.ShowErrorMessageBox("ファイルにアクセスできません", "ファイルアクセスエラー");
                 return;
             }
 
-            // 選択されているMediaの情報を保持
-            SelectedMediaInfo = _info;
+            // 素材の情報を設定する前に初期化
+            // Viewにイベントを投げる(再生中のものがある場合は停止する)
+            // Viewに設定されているものを一度削除。
+            //
+            ChangeSourceEvent(this, EventArgs.Empty);
+            ViewImageSource = null;
+            ViewMovieSource = null;
 
-            switch (_info.ContentMediaType)
+            // 選択されているMediaの情報とタイプを取得
+            SelectedMediaInfo = _info;
+            MediaTypeOfSelected = _info.ContentMediaType;
+
+            switch (MediaTypeOfSelected)
             {
                 case MediaContentInfo.MediaType.PICTURE:
+                    // 静止画の場合
                     SelectedPictureContent = new PictureMediaContent(SelectedMediaInfo);
                     LoadViewImageSource(SelectedPictureContent);
                     break;
                 case MediaContentInfo.MediaType.MOVIE:
-                    // Todo: いずれ追加
+                    // 動画の場合
+                    SelectedMovieContent = new MovieMediaContent(SelectedMediaInfo);
+                    LoadViewMovieSource(SelectedMovieContent);
                     break;
                 case MediaContentInfo.MediaType.UNKNOWN:
                 default:
@@ -675,18 +707,27 @@ namespace PhotoViewer.ViewModel
         /// <param name="_info">拡大表示するメディア情報</param>
         public async void LoadViewImageSource(PictureMediaContent _info)
         {
-            Mouse.OverrideCursor = Cursors.Wait;
+            try
+            {
+                Mouse.OverrideCursor = Cursors.Wait;
 
-            // 画像を表示
-            IsReadMedia = true;
-            await Task.Run(() => SetPictureAndExifInfo(_info));
-            IsReadMedia = false;
+                // 画像を表示
+                IsReadMedia = true;
+                await Task.Run(() => SetPictureAndExifInfo(_info));
+                IsReadMedia = false;
 
-            // SaveButtonとExifDeleteButtonの有効化
-            const bool IsEnableFlag = true;
-            SetIsEnableButton(IsEnableFlag);
-
-            Mouse.OverrideCursor = Cursors.Arrow;
+                // SaveButtonとExifDeleteButtonの有効化
+                const bool IsEnableFlag = true;
+                SetIsEnableButton(IsEnableFlag);
+            }
+            catch
+            {
+                App.ShowErrorMessageBox("ファイルアクセスでエラーが発生しました。", "ファイルアクセスエラー");
+            }
+            finally
+            {
+                Mouse.OverrideCursor = null;
+            }
         }
 
         /// <summary>
@@ -717,6 +758,16 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
+        /// 動画素材の情報を設定する
+        /// </summary>
+        /// <param name="_info">拡大表示するメディア情報</param>
+        public void LoadViewMovieSource(MovieMediaContent _info)
+        {
+            // Movieのソース(URI)を設定
+            ViewMovieSource = _info.FilePath;
+        }
+
+        /// <summary>
         /// MediaInfoListの画像をダブルクリックしたときの動作
         /// </summary>
         /// <param name="_info">選択したメディア情報</param>
@@ -731,7 +782,7 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void OpenFileExplorerButtonClicked()
         {
-            System.Diagnostics.Process.Start("EXPLORER.EXE", SelectedPicturePath);
+            System.Diagnostics.Process.Start("EXPLORER.EXE", SelectedPath);
         }
 
         /// <summary>
@@ -758,7 +809,7 @@ namespace PhotoViewer.ViewModel
                         File.Delete(SelectedMediaInfo.FilePath);
 
                         // 現在のディレクトリを再読込
-                        UpdatePictureContentsList();
+                        UpdateContentsList();
                     }
                     else
                     {
@@ -809,7 +860,7 @@ namespace PhotoViewer.ViewModel
                     if (ImageFileControl.DeleteExifInfoAndSaveFile(_filePath))
                     {
                         // Exif情報を削除した画像を保存後、現在のディレクトリを再読込
-                        UpdatePictureContentsList();
+                        UpdateContentsList();
                     }
                 }
                 else

@@ -1,6 +1,9 @@
-﻿using System.Windows;
+﻿using System;
+using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using PhotoViewer.Model;
 using PhotoViewer.ViewModel;
@@ -12,9 +15,25 @@ namespace PhotoViewer
     /// </summary>
     public partial class MainWindow : Window
     {
+        // 動画を再生中であるかどうかのフラグ
+        private bool IsPlayMovie { get; set; }
+
+        // 動画の再生が終了しているかどうかのフラグ
+        private bool IsPlayEnded { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
+
+            DataContextChanged += (o, e) =>
+            {
+                MainWindowViewModel _vm = DataContext as MainWindowViewModel;
+
+                if (_vm != null)
+                {
+                    _vm.ChangeSourceEvent += (sender, args) => { ChangeSourceBeforeExecute(); };
+                }
+            };
 
             // MainWindowのViewModelの読み込み
             MainWindowViewModel _mainWindowViewModel = new MainWindowViewModel();
@@ -137,11 +156,148 @@ namespace PhotoViewer
         /// <summary>
         /// ウィンドウを終了したとき
         /// </summary>
+        /// <param name="sender">MainWindow</param>
+        /// <param name="e">引数情報</param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             // 終了処理
             MainWindowViewModel _model = this.DataContext as MainWindowViewModel;
             _model.StopThreadAndTask();
+        }
+
+        /// <summary>
+        /// ウィンドウを移動したとき
+        /// </summary>
+        /// <param name="sender">MainWindow</param>
+        /// <param name="e">引数情報</param>
+        private void Window_LocationChanged(object sender, EventArgs e)
+        {
+            // 現在のウィンドウの位置を取得
+            WINDOWPLACEMENT _placement;
+            var _hwnd = new WindowInteropHelper(this).Handle;
+            WindowManager.GetWindowPlacement(_hwnd, out _placement);
+
+            if (_placement.normalPosition.Left > SystemParameters.PrimaryScreenWidth)
+            {
+                // セカンドモニターにウィンドウがある場合
+                // ソフトウェアレンダリングに切り替え
+                // MediaElementがセカンドモニターでフリーズする問題の対策
+                //
+                var _hwndSource = PresentationSource.FromVisual(this) as HwndSource;
+                if (_hwndSource != null)
+                {
+                    var _hwndTarget = _hwndSource.CompositionTarget;
+                    if (_hwndTarget != null) _hwndTarget.RenderMode = RenderMode.SoftwareOnly;
+                }
+            }
+            else
+            {
+                // プライマリモニターにウィンドウがある場合
+                // ハードウェアレンダリングに切り替え
+                //
+                var _hwndSource = PresentationSource.FromVisual(this) as HwndSource;
+                if (_hwndSource != null)
+                {
+                    var _hwndTarget = _hwndSource.CompositionTarget;
+                    if (_hwndTarget != null) _hwndTarget.RenderMode = RenderMode.Default;
+                }
+            }
+        }
+
+        /// <summary>
+        /// ソースを切り替える前に行う動作(MainWindowViewModelからのイベントで動作する)
+        /// </summary>
+        private void ChangeSourceBeforeExecute()
+        {
+            try
+            {
+                if (this.viewMovieElement.Source == null)
+                {
+                    return;
+                }
+
+                // 再生中または再生終了の場合
+                if (IsPlayMovie || IsPlayEnded)
+                {
+                    // 再生停止
+                    this.viewMovieElement.Stop();
+
+                    IsPlayMovie = false;
+                    IsPlayEnded = false;
+
+                    return;
+                }
+            }
+            catch
+            {
+                App.ShowErrorMessageBox("内部エラー", "内部でエラーが発生しました。");
+                try
+                {
+                    this.viewMovieElement.Stop();
+                }
+                catch { }   // エラーからの回復なので、ここでのエラーは握りつぶす
+            }
+        }
+
+        /// <summary>
+        /// MediaElementをクリックした場合は再生または停止処理を行う
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">引数情報</param>
+        private void ViewMovieElement_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            MainWindowViewModel _model = this.DataContext as MainWindowViewModel;
+
+            if (this.viewMovieElement.Source == null)
+            {
+                return;
+            }
+
+            // 動画の再生が終了している場合
+            if (IsPlayEnded)
+            {
+                // 再生停止
+                this.viewMovieElement.Stop();
+                IsPlayEnded = false;
+
+                // 再度、再生する
+                this.viewMovieElement.Play();
+
+                return;
+            }
+
+            if (IsPlayMovie)
+            {
+                // 動画再生中の場合はPauseを行う
+                this.viewMovieElement.Pause();
+                IsPlayMovie = false;
+                return;
+            }
+
+            // 動画を再生する
+            IsPlayMovie = true;
+            this.viewMovieElement.Play();
+        }
+
+        /// <summary>
+        /// 動画の再生が終了したときに実行する
+        /// </summary>
+        /// <param name="sender">MediaElement</param>
+        /// <param name="e">引数情報</param>
+        private void ViewMovieElement_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            IsPlayEnded = true;
+        }
+
+        /// <summary>
+        /// 動画をロードしたときに実行する
+        /// </summary>
+        /// <param name="sender">MediaElement</param>
+        /// <param name="e">引数情報</param>
+        private void ViewMovieElement_Loaded(object sender, RoutedEventArgs e)
+        {
+            // 再生一時停止
+            this.viewMovieElement.Pause();
         }
     }
 }

@@ -9,7 +9,7 @@ namespace PhotoViewer.Model
         // サポートする拡張子(Picture、Movie)
         private static readonly string[] SupportPictureExtensions = { ".jpg", ".bmp", ".png", ".tiff", ".tif", ".gif", ".nef", ".dng" };
         private static readonly string[] SupportRawPictureExtensions = { ".nef", ".dng" };
-        private static readonly string[] SupportMovieExtensions = { };
+        private static readonly string[] SupportMovieExtensions = { ".avi", ".mov", ".mp4" };
 
         /// <summary>
         /// ピクチャサイズで縦長か横長かスクエアか

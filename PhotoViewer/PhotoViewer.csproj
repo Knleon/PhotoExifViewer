@@ -87,6 +87,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\MediaTypeToVisibilityConverter.cs" />
     <Compile Include="Model\ContextMenuControl.cs" />
     <Compile Include="Model\ExifParser.cs" />
     <Compile Include="Model\ExtraAppSetting.cs" />

@@ -3,15 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:c="clr-namespace:PhotoViewer.Converters"
         mc:Ignorable="d"
         ResizeMode="CanResize"
         Icon="/Image/PhotoExifViewerIcon.ico"
         WindowStartupLocation="CenterScreen"
         Title="Photo Exif Viewer" Height ="890" Width="1205" MinHeight="890" MinWidth="1240"
-        Closing="Window_Closing">
+        Closing="Window_Closing" LocationChanged="Window_LocationChanged">
     <Window.Background>
         <SolidColorBrush Color="#F0F0F0"/>
     </Window.Background>
+    <Window.Resources>
+        <c:MediaTypeToVisibilityConverter x:Key="MediaTypeToVisibilityConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
@@ -152,7 +156,7 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0,0,0">
                         <TextBlock FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Left" Text="フォルダパス："/>
-                        <TextBlock FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding SelectedPicturePath}"/>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding SelectedPath}"/>
                     </StackPanel>
                     <Button Grid.Column="1" MinWidth="100" Margin="0,1,5,1" Command="{Binding OpenFileExplorerCommand}" HorizontalAlignment="Right">
                         <StackPanel Orientation="Horizontal">
@@ -218,7 +222,13 @@
                         </ListBox.Style>
                     </ListBox>
                 </Border>
-                <Image Grid.Row="2" x:Name="viewImage" Source="{Binding ViewImageSource}" VerticalAlignment="Center" Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" Margin="5,5,5,5"/>
+                <Image Grid.Row="2" x:Name="viewImage" Source="{Binding ViewImageSource}" VerticalAlignment="Center"
+                       Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" 
+                       Margin="5" Visibility="{Binding MediaTypeOfSelected, Converter={StaticResource MediaTypeToVisibilityConverter}, ConverterParameter=PICTURE}"/>
+                <MediaElement Grid.Row="2" x:Name="viewMovieElement" Stretch="Fill" Margin="20" Source="{Binding ViewMovieSource}"
+                              Visibility="{Binding MediaTypeOfSelected, Converter={StaticResource MediaTypeToVisibilityConverter}, ConverterParameter=MOVIE}"
+                              MouseLeftButtonUp="ViewMovieElement_MouseLeftButtonUp" ScrubbingEnabled="True"
+                              LoadedBehavior="Manual" MediaEnded="ViewMovieElement_MediaEnded" Loaded="ViewMovieElement_Loaded"/>
             </Grid>
         </Grid>
     </Grid>
