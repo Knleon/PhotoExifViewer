@@ -225,7 +225,7 @@
                 <Image Grid.Row="2" x:Name="viewImage" Source="{Binding ViewImageSource}" VerticalAlignment="Center"
                        Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" 
                        Margin="5" Visibility="{Binding MediaTypeOfSelected, Converter={StaticResource MediaTypeToVisibilityConverter}, ConverterParameter=PICTURE}"/>
-                <MediaElement Grid.Row="2" x:Name="viewMovieElement" Stretch="Fill" Margin="20" Source="{Binding ViewMovieSource}"
+                <MediaElement Grid.Row="2" x:Name="viewMovieElement" Stretch="Uniform" Margin="20" Source="{Binding ViewMovieSource}"
                               Visibility="{Binding MediaTypeOfSelected, Converter={StaticResource MediaTypeToVisibilityConverter}, ConverterParameter=MOVIE}"
                               MouseLeftButtonUp="ViewMovieElement_MouseLeftButtonUp" ScrubbingEnabled="True"
                               LoadedBehavior="Manual" MediaEnded="ViewMovieElement_MediaEnded" Loaded="ViewMovieElement_Loaded"/>
