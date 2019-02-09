@@ -1,6 +1,6 @@
 ﻿# PhotoExifViewer
 
-KLeonオリジナルのフォトビューワーです。
+Windows用のKLeonオリジナルのフォトビューワーです。
 
 Exif情報と写真閲覧、Exif情報の削除などが行えます。
 
