@@ -67,8 +67,19 @@ namespace PhotoViewer.ViewModel
         public ICommand AllLinkAppDeleteCommand { get; set; }
 
         // 連携アプリ情報を格納するリストを定義
-        public ObservableCollection<ExtraAppSetting> ExtraAppSettingCollection { get; set; }
-        public ObservableCollection<ExtraAppSetting> AddAppSettingCollection { get; set; }
+        private ObservableCollection<ExtraAppSetting> extraAppSettingCollection = new ObservableCollection<ExtraAppSetting>();
+        public ObservableCollection<ExtraAppSetting> ExtraAppSettingCollection
+        {
+            get { return extraAppSettingCollection; }
+            set { extraAppSettingCollection = value; }
+        }
+
+        private ObservableCollection<ExtraAppSetting> addAppSettingCollection = new ObservableCollection<ExtraAppSetting>();
+        public ObservableCollection<ExtraAppSetting> AddAppSettingCollection
+        {
+            get { return addAppSettingCollection; }
+            set { addAppSettingCollection = value; }
+        }
 
         // 参照ボタンでの処理後、ExtraAppSettingを渡すためのイベント
         public delegate void LinkageEventHandler(object _sender, LinkageEventArgs e);
@@ -115,6 +126,40 @@ namespace PhotoViewer.ViewModel
             LinkApp3DeleteCommand    = new DelegateCommand(LinkApp3DeleteButtonClicked);
             RegisterLinkAppCommand   = new DelegateCommand(RegisterLinkAppButtonClicked);
             AllLinkAppDeleteCommand  = new DelegateCommand(AllLinkAppDeleteButtonClicked);
+        }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public LinkageProgramViewModel()
+        {
+            // Viewのコマンドと変数の初期値を設定
+            SetCommand();
+            LinkAppPath1 = "";
+            LinkAppPath2 = "";
+            LinkAppPath3 = "";
+
+            // confファイルの読み込み(ObservableCollectionに値を代入)
+            ExtraAppSetting.Import(ExtraAppSettingCollection);
+
+            // 値をUIに反映
+            foreach (var _extraAppSetting in ExtraAppSettingCollection)
+            {
+                switch (_extraAppSetting.Id)
+                {
+                    case 1:
+                        LinkAppPath1 = _extraAppSetting.Path;
+                        break;
+                    case 2:
+                        LinkAppPath2 = _extraAppSetting.Path;
+                        break;
+                    case 3:
+                        LinkAppPath3 = _extraAppSetting.Path;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         /// <summary>
@@ -287,44 +332,6 @@ namespace PhotoViewer.ViewModel
             _linkageEventArgs._addExtraAppSettingCollection = AddAppSettingCollection;
             OnLinkageEvent(_linkageEventArgs);
             AddAppSettingCollection.Clear();
-        }
-
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        public LinkageProgramViewModel()
-        {
-            // Viewのコマンドと変数の初期値を設定
-            SetCommand();
-            LinkAppPath1 = "";
-            LinkAppPath2 = "";
-            LinkAppPath3 = "";
-
-            // 連携アプリ情報を格納するリストを定義
-            ExtraAppSettingCollection = new ObservableCollection<ExtraAppSetting>();
-            AddAppSettingCollection = new ObservableCollection<ExtraAppSetting>();
-
-            // confファイルの読み込み(ObservableCollectionに値を代入)
-            ExtraAppSetting.Import(ExtraAppSettingCollection);
-
-            // 値をUIに反映
-            foreach(var _extraAppSetting in ExtraAppSettingCollection)
-            {
-                switch(_extraAppSetting.Id)
-                {
-                    case 1:
-                        LinkAppPath1 = _extraAppSetting.Path;
-                        break;
-                    case 2:
-                        LinkAppPath2 = _extraAppSetting.Path;
-                        break;
-                    case 3:
-                        LinkAppPath3 = _extraAppSetting.Path;
-                        break;
-                    default:
-                        break;
-                }
-            }
         }
     }
 }

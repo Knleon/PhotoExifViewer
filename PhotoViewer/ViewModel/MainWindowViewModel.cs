@@ -144,13 +144,36 @@ namespace PhotoViewer.ViewModel
         /// <summary>
         /// メディア情報の読み込みスレッドをリロードするかどうかのフラグ
         /// </summary>
-        private bool LoadPictureContentsBackgroundWorker_Reload; 
+        private bool LoadPictureContentsBackgroundWorker_Reload;
 
         // 情報を格納するリスト
-        public ObservableCollection<MediaContentInfo> MediaInfoList { get; set; }
-        public ObservableCollection<ExplorerTreeSourceViewModel> ExplorerTree { get; }
-        public ObservableCollection<ContextMenuControl> ContextMenuCollection { get; set; }
-        public ObservableCollection<ExtraAppSetting> ExtraAppSettingCollection { get; set; }
+        private ObservableCollection<MediaContentInfo> mediaInfoList = new ObservableCollection<MediaContentInfo>();
+        public ObservableCollection<MediaContentInfo> MediaInfoList
+        {
+            get { return mediaInfoList; }
+            set { mediaInfoList = value; }
+        }
+
+        private ObservableCollection<ExplorerTreeSourceViewModel> explorerTree = new ObservableCollection<ExplorerTreeSourceViewModel>();
+        public ObservableCollection<ExplorerTreeSourceViewModel> ExplorerTree
+        {
+            get { return explorerTree; }
+            set { explorerTree = value; }
+        }
+
+        private ObservableCollection<ContextMenuControl> contextMenuCollection = new ObservableCollection<ContextMenuControl>();
+        public ObservableCollection<ContextMenuControl> ContextMenuCollection
+        {
+            get { return contextMenuCollection; }
+            set { contextMenuCollection = value; }
+        }
+
+        private ObservableCollection<ExtraAppSetting> extraAppSettingCollection = new ObservableCollection<ExtraAppSetting>();
+        public ObservableCollection<ExtraAppSetting> ExtraAppSettingCollection
+        {
+            get { return extraAppSettingCollection; }
+            set { extraAppSettingCollection = value; }
+        }
 
         /// <summary>
         /// 外部起動アプリのDictionary
@@ -176,12 +199,6 @@ namespace PhotoViewer.ViewModel
 
             // コマンドを設定
             SetCommand();
-
-            // 情報をもつリストを定義
-            MediaInfoList = new ObservableCollection<MediaContentInfo>();
-            ExplorerTree = new ObservableCollection<ExplorerTreeSourceViewModel>();
-            ContextMenuCollection = new ObservableCollection<ContextMenuControl>();
-            ExtraAppSettingCollection = new ObservableCollection<ExtraAppSetting>();
 
             // 外部起動アプリのDictionaryを定義
             ExtraAppPathDictionary = new Dictionary<string, string>();
