@@ -255,7 +255,9 @@ namespace PhotoViewer.ViewModel
                 }
                 catch (Exception _ex)
                 {
+                    // ログを吐き出す
                     App.LogException(_ex);
+                    return;
                 }
             }
         }
@@ -399,6 +401,7 @@ namespace PhotoViewer.ViewModel
                 catch (Exception _ex)
                 {
                     App.LogException(_ex);
+                    return;
                 }
             }
 
@@ -531,6 +534,7 @@ namespace PhotoViewer.ViewModel
             {
                 App.LogException(_ex);
                 App.ShowErrorMessageBox("メディアの読み込みに失敗しました。", "読み込みエラー");
+                return;
             }
         }
 
@@ -740,6 +744,7 @@ namespace PhotoViewer.ViewModel
             catch
             {
                 App.ShowErrorMessageBox("ファイルアクセスでエラーが発生しました。", "ファイルアクセスエラー");
+                return;
             }
             finally
             {
@@ -838,6 +843,7 @@ namespace PhotoViewer.ViewModel
                 {
                     App.LogException(_ex);
                     App.ShowErrorMessageBox("ファイルの削除でエラーが発生しました。", "ファイル削除エラー");
+                    return;
                 }
             }
             else
@@ -890,6 +896,7 @@ namespace PhotoViewer.ViewModel
             {
                 App.LogException(_ex);
                 App.ShowErrorMessageBox("ファイル保存時に発生しました。", "ファイル保存エラー");
+                return;
             }
         }
 
@@ -914,20 +921,24 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// 指定されたファイルがロックされているかどうかを返します。
+        /// 指定されたファイルがロックされているかどうかを返す
         /// </summary>
         /// <param name="path">検証したいファイルへのフルパス</param>
-        /// <returns>ロックされているかどうか</returns>
-        private bool IsFileLocked(string path)
+        /// <returns>ロックされている場合はTrueを返す</returns>
+        private bool IsFileLocked(string _filePath)
         {
             FileStream stream = null;
 
             try
             {
-                stream = new FileStream(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+                stream = new FileStream(_filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+
+                // ファイルアクセスできる場合は、ロックされていない
+                return false;
             }
             catch
             {
+                // ファイルロックされている
                 return true;
             }
             finally
@@ -936,24 +947,24 @@ namespace PhotoViewer.ViewModel
                 {
                     stream.Close();
                 }
+
+                stream = null;
             }
-            return false;
         }
 
         /// <summary>
         /// スレッドを停止するメソッド
         /// </summary>
-        /// <return>スレッドが停止しているかどうか</return>
+        /// <return>スレッドが停止している場合はTrueを返す</return>
         public bool StopThreadAndTask()
         {
-            bool _isStop = true;
             if (LoadPictureContentsBackgroundWorker != null && LoadPictureContentsBackgroundWorker.IsBusy)
             {
-                _isStop = false;
                 LoadPictureContentsBackgroundWorker.CancelAsync();
+                return false;
             }
 
-            return _isStop;
+            return true;
         }
     }
 }
