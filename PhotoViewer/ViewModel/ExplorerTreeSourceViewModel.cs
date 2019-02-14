@@ -17,15 +17,16 @@ namespace PhotoViewer.ViewModel
 
     public class ExplorerTreeSourceViewModel : TreeViewItem, INotifyPropertyChanged
     {
-        public DirectoryInfo _Directory { get; set; }
-        private bool _Expanded { get; set; } = false;
-        public bool IsDrive { get; set; } = false;
+        private DirectoryInfo _Directory = null;
+        private bool _Expanded = false;
+        private bool IsDrive = false;
         private System.IO.FileSystemWatcher FileWatcher = null;
 
         /// <summary>
         /// ExplorerTreeの更新情報を受け取るイベント
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
+
         private ExplorerTreeSourceViewModel _selectionItem;
         public ExplorerTreeSourceViewModel SelectionItem
         {
