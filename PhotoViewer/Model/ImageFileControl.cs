@@ -98,6 +98,7 @@ namespace PhotoViewer.Model
         /// 拡大表示する画像を作成する
         /// </summary>
         /// <param name="_filePath">画像ファイルのパス</param>
+        /// <returns>読み込みした画像</returns>
         public static BitmapSource CreateViewImage(string _filePath)
         {
             // 読み込む画像が縦長か横長かスクエアか確認(読み込む画像の幅、高さも取得)
@@ -109,45 +110,32 @@ namespace PhotoViewer.Model
             // 画像の読み込み
             using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
             {
-                BitmapSource _bitmapSource = null;
+                // ファイル拡張子を取得する
                 string _extension = Path.GetExtension(_filePath).ToLower();
 
                 // 表示領域のサイズ
                 const int _viewWidth = 880;
                 const int _viewHeight = 660;
 
+                BitmapSource _bitmapSource = null;
+
                 try
                 {
                     if (!MediaContentChecker.CheckRawImageExtensions(_extension))
                     {
                         // Not Raw image case
-                        // BitmapImageをデコードする(画像作成)
-                        var _bitmapImage = CreateViewImageFromStream(_stream, _pictureType, _sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight);
-
-                        // 画像からメタデータを取得する
-                        _stream.Position = 0;
-                        var _metaData = (BitmapFrame.Create(_stream).Metadata) as BitmapMetadata;
-                        _stream.Close();
-
-                        // 画像を回転する
-                        _bitmapSource = RotateBitmapSource(_metaData, _bitmapImage);
+                        _bitmapSource = ReadNotRawImage(_stream, _pictureType, _sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight);
                     }
                     else
                     {
                         // Raw Image case
-                        // Bitmapデコーダで画像を読み込む
-                        BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.OnDemand);
-                        _bitmapSource = _bmpDecoder.Frames[0];
-                    }
-
-                    // 表示領域より大きな画像がある場合(880x660に合うようにリサイズし直す)
-                    if (!CheckPictureSize(_sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight))
-                    {
-                        _bitmapSource = CreateResizeImage(_bitmapSource, _viewWidth, _viewHeight);
+                        _bitmapSource = ReadRawImage(_stream, _sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight);
                     }
 
                     // BitmapSourceを凍結
                     _bitmapSource.Freeze();
+
+                    return _bitmapSource;
                 }
                 catch (Exception _ex)
                 {
@@ -157,11 +145,66 @@ namespace PhotoViewer.Model
                     // 後処理
                     _stream.Close();
                     _bitmapSource = null;
+
                     return _bitmapSource;
                 }
-
-                return _bitmapSource;
             }
+        }
+
+        /// <summary>
+        /// Rawではない画像を読み込む
+        /// </summary>
+        /// <param name="_stream">画像のストリーム</param>
+        /// <param name="_pictureType">ピクチャタイプ</param>
+        /// <param name="_sourceImageWidth">ソースの幅</param>
+        /// <param name="_sourceImageHeight">ソースの高さ</param>
+        /// <param name="_viewWidth">表示領域の幅</param>
+        /// <param name="_viewHeight">表示領域の高さ</param>
+        /// <returns>読み込みした画像</returns>
+        private static BitmapSource ReadNotRawImage(MemoryStream _stream, MediaContentChecker.PictureType _pictureType, int _sourceImageWidth, int _sourceImageHeight, int _viewWidth, int _viewHeight)
+        {
+            // BitmapImageをデコードする(画像作成)
+            BitmapSource _bitmapSource = CreateViewImageFromStream(_stream, _pictureType, _sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight);
+
+            // 表示領域より大きな画像がある場合(880x660に合うようにリサイズし直す)
+            if (!CheckPictureSize(_sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight))
+            {
+                _bitmapSource = CreateResizeImage(_bitmapSource, _viewWidth, _viewHeight);
+            }
+
+            // 画像からメタデータを取得する
+            _stream.Position = 0;
+            var _metaData = (BitmapFrame.Create(_stream).Metadata) as BitmapMetadata;
+            _stream.Close();
+
+            // 画像を回転する
+            _bitmapSource = RotateBitmapSource(_metaData, _bitmapSource, _viewWidth, _viewHeight);
+
+            return _bitmapSource;
+        }
+
+        /// <summary>
+        /// Raw画像を読み込む
+        /// </summary>
+        /// <param name="_stream">画像のストリーム</param>
+        /// <param name="_sourceImageWidth">ソースの幅</param>
+        /// <param name="_sourceImageHeight">ソースの高さ</param>
+        /// <param name="_viewWidth">表示領域の幅</param>
+        /// <param name="_viewHeight">表示領域の高さ</param>
+        /// <returns>読み込みした画像</returns>
+        private static BitmapSource ReadRawImage(MemoryStream _stream, int _sourceImageWidth, int _sourceImageHeight, int _viewWidth, int _viewHeight)
+        {
+            // Bitmapデコーダで画像を読み込む
+            BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.OnDemand);
+            BitmapSource _bitmapSource = _bmpDecoder.Frames[0];
+
+            // 表示領域より大きな画像がある場合(880x660に合うようにリサイズし直す)
+            if (!CheckPictureSize(_sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight))
+            {
+                _bitmapSource = CreateResizeImage(_bitmapSource, _viewWidth, _viewHeight);
+            }
+
+            return _bitmapSource;
         }
 
         /// <summary>
@@ -184,19 +227,19 @@ namespace PhotoViewer.Model
                     _thumbnailSource = _frame.Clone();
                 }
 
-                // Rawファイル以外はサムネイル画像を回転する
-                string _extension = Path.GetExtension(_filePath).ToLower();
-                if (!MediaContentChecker.CheckRawImageExtensions(_extension))
-                {
-                    _thumbnailSource = RotateBitmapSource(_metaData, _thumbnailSource);
-                }
-
                 // サムネイル画像を生成する(100x75以上のものはこのサイズに収まるように縮小)
                 const int _maxContentsWidth = 100;
                 const int _maxContentsHeight = 75;
                 if (!CheckPictureSize(_thumbnailSource.PixelWidth, _thumbnailSource.PixelHeight, _maxContentsWidth, _maxContentsHeight))
                 {
                     _thumbnailSource = CreateResizeImage(_thumbnailSource, _maxContentsWidth, _maxContentsHeight);
+                }
+
+                // Rawファイル以外はサムネイル画像を回転する
+                string _extension = Path.GetExtension(_filePath).ToLower();
+                if (!MediaContentChecker.CheckRawImageExtensions(_extension))
+                {
+                    _thumbnailSource = RotateBitmapSource(_metaData, _thumbnailSource, _maxContentsWidth, _maxContentsHeight);
                 }
 
                 // BitmapSourceを凍結
@@ -357,7 +400,7 @@ namespace PhotoViewer.Model
         /// <summary>
         /// BitmapSourceをOrientationに合わせて回転するメソッド
         /// </summary>
-        private static BitmapSource RotateBitmapSource(BitmapMetadata _metaData, BitmapSource _bitmapSource)
+        private static BitmapSource RotateBitmapSource(BitmapMetadata _metaData, BitmapSource _bitmapSource, int _viewWidth, int _viewHeight)
         {
             string query = "/app1/ifd/exif:{uint=274}";
             if (!_metaData.ContainsQuery(query))
@@ -368,22 +411,36 @@ namespace PhotoViewer.Model
             switch (Convert.ToUInt32(_metaData.GetQuery(query)))
             {
                 case 1:
-                    return _bitmapSource;
+                    break;
                 case 3:
-                    return TransformBitmap(_bitmapSource, new RotateTransform(180));
+                    _bitmapSource = TransformBitmap(_bitmapSource, new RotateTransform(180));
+                    break;
                 case 6:
-                    return TransformBitmap(_bitmapSource, new RotateTransform(90));
+                    _bitmapSource = TransformBitmap(_bitmapSource, new RotateTransform(90));
+                    break;
                 case 8:
-                    return TransformBitmap(_bitmapSource, new RotateTransform(270));
+                    _bitmapSource = TransformBitmap(_bitmapSource, new RotateTransform(270));
+                    break;
                 case 2:
-                    return TransformBitmap(_bitmapSource, new ScaleTransform(-1, 1, 0, 0));
+                    _bitmapSource = TransformBitmap(_bitmapSource, new ScaleTransform(-1, 1, 0, 0));
+                    break;
                 case 4:
-                    return TransformBitmap(_bitmapSource, new ScaleTransform(1, -1, 0, 0));
+                    _bitmapSource = TransformBitmap(_bitmapSource, new ScaleTransform(1, -1, 0, 0));
+                    break;
                 case 5:
-                    return TransformBitmap(TransformBitmap(_bitmapSource, new RotateTransform(90)), new ScaleTransform(-1, 1, 0, 0));
+                    _bitmapSource = TransformBitmap(TransformBitmap(_bitmapSource, new RotateTransform(90)), new ScaleTransform(-1, 1, 0, 0));
+                    break;
                 case 7:
-                    return TransformBitmap(TransformBitmap(_bitmapSource, new RotateTransform(270)), new ScaleTransform(-1, 1, 0, 0));
+                    _bitmapSource = TransformBitmap(TransformBitmap(_bitmapSource, new RotateTransform(270)), new ScaleTransform(-1, 1, 0, 0));
+                    break;
             }
+
+            // 表示領域より大きな画像がある場合は、表示領域に合わせてリサイズ
+            if (!CheckPictureSize(_bitmapSource.PixelWidth, _bitmapSource.PixelHeight, _viewWidth, _viewHeight))
+            {
+                _bitmapSource = CreateResizeImage(_bitmapSource, _viewWidth, _viewHeight);
+            }
+
             return _bitmapSource;
         }
 
