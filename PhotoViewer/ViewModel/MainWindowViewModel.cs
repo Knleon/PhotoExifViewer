@@ -592,10 +592,13 @@ namespace PhotoViewer.ViewModel
 
                 System.Threading.Thread.Sleep(50);
 
-                // 強制メモリ解放
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
+                // 大きな画像がメモリに残っていると、読み込みエラーが発生することがあるので、強制メモリ解放する(300MBを超えたら解放する)
+                if (Environment.WorkingSet > 300000000)
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
+                }
             }
         }
 

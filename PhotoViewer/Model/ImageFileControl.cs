@@ -166,16 +166,29 @@ namespace PhotoViewer.Model
             // BitmapImageをデコードする(画像作成)
             BitmapSource _bitmapSource = CreateViewImageFromStream(_stream, _pictureType, _sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight);
 
-            // 表示領域より大きな画像がある場合(880x660に合うようにリサイズし直す)
-            if (!CheckPictureSize(_sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight))
-            {
-                _bitmapSource = CreateResizeImage(_bitmapSource, _viewWidth, _viewHeight);
-            }
-
             // 画像からメタデータを取得する
             _stream.Position = 0;
             var _metaData = (BitmapFrame.Create(_stream).Metadata) as BitmapMetadata;
             _stream.Close();
+
+            // 画像の回転情報を取得(Rotation:5,6,7,8の場合は縦画像)
+            uint _rotation = GetRotation(_metaData);
+
+            // 表示領域より大きな画像がある場合(880x660に合うようにリサイズし直す)
+            // ただし、縦画像の場合は660x880に合うようにリサイズする
+            //
+            if (_rotation == 5 || _rotation == 6 || _rotation == 7 || _rotation == 8)
+            {
+                // 縦画像なので、表示幅、表示高さを入れ替えてリサイズする
+                int _tmp = _viewWidth;
+                _viewWidth = _viewHeight;
+                _viewHeight = _tmp;
+            }
+
+            if (!CheckPictureSize(_sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight))
+            {
+                _bitmapSource = CreateResizeImage(_bitmapSource, _viewWidth, _viewHeight);
+            }
 
             // 画像を回転する
             _bitmapSource = RotateBitmapSource(_metaData, _bitmapSource, _viewWidth, _viewHeight);
@@ -398,17 +411,30 @@ namespace PhotoViewer.Model
         }
 
         /// <summary>
+        /// メタデータから回転情報を取得する
+        /// </summary>
+        /// <param name="_metaData"><メタデータ/param>
+        /// <returns>画像の回転情報</returns>
+        private static uint GetRotation(BitmapMetadata _metaData)
+        {
+            string _query = "/app1/ifd/exif:{uint=274}";
+            if (!_metaData.ContainsQuery(_query))
+            {
+                return 0;   // エラーとして返す
+            }
+
+            return Convert.ToUInt32(_metaData.GetQuery(_query));
+        }
+
+        /// <summary>
         /// BitmapSourceをOrientationに合わせて回転するメソッド
         /// </summary>
         private static BitmapSource RotateBitmapSource(BitmapMetadata _metaData, BitmapSource _bitmapSource, int _viewWidth, int _viewHeight)
         {
-            string query = "/app1/ifd/exif:{uint=274}";
-            if (!_metaData.ContainsQuery(query))
-            {
-                return _bitmapSource;
-            }
+            // 画像の回転情報を取得
+            uint _rotation = GetRotation(_metaData);
 
-            switch (Convert.ToUInt32(_metaData.GetQuery(query)))
+            switch (_rotation)
             {
                 case 1:
                     break;
@@ -433,12 +459,8 @@ namespace PhotoViewer.Model
                 case 7:
                     _bitmapSource = TransformBitmap(TransformBitmap(_bitmapSource, new RotateTransform(270)), new ScaleTransform(-1, 1, 0, 0));
                     break;
-            }
-
-            // 表示領域より大きな画像がある場合は、表示領域に合わせてリサイズ
-            if (!CheckPictureSize(_bitmapSource.PixelWidth, _bitmapSource.PixelHeight, _viewWidth, _viewHeight))
-            {
-                _bitmapSource = CreateResizeImage(_bitmapSource, _viewWidth, _viewHeight);
+                default:
+                    break;
             }
 
             return _bitmapSource;
