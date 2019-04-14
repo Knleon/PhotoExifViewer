@@ -1,7 +1,4 @@
 ﻿using Microsoft.WindowsAPICodePack.Shell;
-using Shell32;
-using System;
-using System.IO;
 
 namespace PhotoViewer.Model
 {
