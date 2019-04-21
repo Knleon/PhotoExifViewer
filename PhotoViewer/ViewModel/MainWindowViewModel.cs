@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace PhotoViewer.ViewModel
 {
@@ -178,13 +179,13 @@ namespace PhotoViewer.ViewModel
         /// <summary>
         /// 外部起動アプリのDictionary
         /// </summary>
-        private Dictionary<string, string> ExtraAppPathDictionary { set; get; }
+        private Dictionary<string, string> ExtraAppPathDictionary;
 
         // 以前のディレクトリ保持
-        private string PreviousFilePath { get; set; }
+        private string PreviousFilePath;
 
         // メディアを読み込み中であるかどうかのフラグ
-        public bool IsReadMedia { get; set; }
+        public bool IsReadMedia;
 
 
         /// <summary>
@@ -328,15 +329,8 @@ namespace PhotoViewer.ViewModel
             // 1つも登録されていないときは、全て追加
             if (ExtraAppSettingCollection.Count == 0)
             {
-                var _orderedByIdCollection = new ObservableCollection<ExtraAppSetting>();
-                foreach (var _extraAppSetting in _addExtraAppSettingCollection)
-                {
-                    // 仮のExtraAppSettingのコレクションに保存する
-                    _orderedByIdCollection.Add(_extraAppSetting);
-                }
-
                 // IDで並べ替えて、表示用のExtraAppSettingCollectionに代入
-                _orderedByIdCollection = new ObservableCollection<ExtraAppSetting>(_orderedByIdCollection.OrderBy(n => n.Id));
+                var _orderedByIdCollection = new ObservableCollection<ExtraAppSetting>(_addExtraAppSettingCollection.OrderBy(n => n.Id));
                 ExtraAppSettingCollection = _orderedByIdCollection;
 
                 // ContextMenuの項目を更新
@@ -350,16 +344,19 @@ namespace PhotoViewer.ViewModel
                 // 1つ以上登録されているとき
                 foreach (var _extraAppSetting in _addExtraAppSettingCollection)
                 {
-                    // 既存のコレクションに同じIDが含まれるか確認
-                    ExtraAppSetting _containItem = ExtraAppSettingCollection.Where((i) => i.Id == _extraAppSetting.Id).SingleOrDefault();
+                    // 既存の連携アプリに同じIDのものがあれば、そのアプリ情報を取得
+                    ExtraAppSetting _containItem = ExtraAppSettingCollection.Where((i) => i.Id == _extraAppSetting.Id).FirstOrDefault();
+
                     if (_containItem != null)
                     {
-                        // 存在する場合はPathを確認
-                        if (_containItem.Path != _extraAppSetting.Path)
+                        // 同じIDが存在し、Pathも同じ場合は何もしない
+                        if (_containItem.Path == _extraAppSetting.Path)
                         {
-                            // 置き換え
-                            ExtraAppSettingCollection[_containItem.Id - 1] = _extraAppSetting;
+                            continue;
                         }
+
+                        // 置き換え
+                        ExtraAppSettingCollection[_containItem.Id - 1] = _extraAppSetting;
                     }
                     else
                     {
@@ -387,22 +384,20 @@ namespace PhotoViewer.ViewModel
             // 削除するIDを取得
             int _deleteId = _e.DeleteId;
 
-            // 既存の外部連携アプリのリストからIDに一致するものを探して削除する
-            for (int i = 0; i < ExtraAppSettingCollection.Count; i++)
+            // 削除するIDに一致するアプリ情報を取得
+            var _deleteAppSetting = extraAppSettingCollection.Where(appSetting => appSetting.Id == _deleteId).FirstOrDefault();
+            Debug.Assert(_deleteAppSetting != null);
+
+            try
             {
-                try
-                {
-                    // DeleteIDと一致したら削除する
-                    if (ExtraAppSettingCollection[i].Id == _deleteId)
-                    {
-                        ExtraAppSettingCollection.RemoveAt(i);
-                    }
-                }
-                catch (Exception _ex)
-                {
-                    App.LogException(_ex);
-                    return;
-                }
+                // アプリ情報を削除
+                ExtraAppSettingCollection.Remove(_deleteAppSetting);
+            }
+            catch (Exception _ex)
+            {
+                App.LogException(_ex);
+                App.ShowErrorMessageBox("連携アプリ情報の削除に失敗しました。", "アプリ情報削除エラー");
+                return;
             }
 
             // ContextMenuの項目を更新
@@ -479,17 +474,16 @@ namespace PhotoViewer.ViewModel
             {
                 LoadPictureContentsBackgroundWorker_Reload = true;
                 LoadPictureContentsBackgroundWorker.CancelAsync();
+                return;
             }
-            else
-            {
-                if (LoadPictureContentsBackgroundWorker_Reload)
-                {
-                    return;
-                }
 
-                // 別スレッドでコンテンツの読み込み
-                LoadContentsList();
+            if (LoadPictureContentsBackgroundWorker_Reload)
+            {
+                return;
             }
+
+            // 別スレッドでコンテンツの読み込み
+            LoadContentsList();
         }
 
         /// <summary>
