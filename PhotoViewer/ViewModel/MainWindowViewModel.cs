@@ -578,8 +578,7 @@ namespace PhotoViewer.ViewModel
                 _mediaFileInfo.ThumbnailImage.Freeze();
 
                 // 準備できたものから先に画像をリストに登録
-                var _dispatcher = App.Current.Dispatcher;
-                _dispatcher.Invoke(new Action(() =>
+                App.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     MediaInfoList.Add(_mediaFileInfo);
                 }));
@@ -605,11 +604,6 @@ namespace PhotoViewer.ViewModel
             if (_args.Error != null)
             {
                 return;
-            }
-            else if (_args.Cancelled)
-            {
-                var _worker = _sender as BackgroundWorker;
-                _worker.Dispose();
             }
             else
             {
@@ -712,9 +706,7 @@ namespace PhotoViewer.ViewModel
                     SelectedMovieContent = new MovieMediaContent(SelectedMediaInfo);
                     LoadViewMovieSource(SelectedMovieContent);
                     break;
-                case MediaContentInfo.MediaType.UNKNOWN:
                 default:
-                    // Todo: エラー処理が必要
                     break;
             }
         }
@@ -758,8 +750,7 @@ namespace PhotoViewer.ViewModel
             _openImage.Freeze();
 
             // 画像を表示
-            var _dispatcher = App.Current.Dispatcher;
-            _dispatcher.Invoke(new Action(() =>
+            App.Current.Dispatcher.Invoke(new Action(() =>
             {
                 ViewImageSource = _openImage;
 
@@ -855,10 +846,19 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void ExifDeleteButtonClicked()
         {
-            // ピクチャメディアであるか確認
-            if (SelectedMediaInfo.ContentMediaType != MediaContentInfo.MediaType.PICTURE)
+            try
             {
-                // 何もしない
+                // ピクチャメディアであるか確認
+                if (SelectedMediaInfo.ContentMediaType != MediaContentInfo.MediaType.PICTURE)
+                {
+                    // 何もしない
+                    return;
+                }
+            }
+            catch (Exception _ex)
+            {
+                App.LogException(_ex);
+                App.ShowErrorMessageBox("ファイル読み込みに失敗しました。", "ファイルアクセスエラー");
                 return;
             }
 
@@ -943,9 +943,8 @@ namespace PhotoViewer.ViewModel
                 if (stream != null)
                 {
                     stream.Close();
+                    stream = null;
                 }
-
-                stream = null;
             }
         }
 

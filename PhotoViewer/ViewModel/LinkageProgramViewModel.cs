@@ -86,20 +86,14 @@ namespace PhotoViewer.ViewModel
         public static event LinkageEventHandler LinkageEvent;
         protected virtual void OnLinkageEvent(LinkageEventArgs e)
         {
-            if (LinkageEvent != null)
-            {
-                LinkageEvent(this, e);
-            }
+            LinkageEvent?.Invoke(this, e);
         }
 
         // 全削除ボタンでのイベント
         public static event EventHandler AllDeleteEvent;
         protected virtual void OnAllDeleteEvent(EventArgs e)
         {
-            if (AllDeleteEvent != null)
-            {
-                AllDeleteEvent(this, e);
-            }
+            AllDeleteEvent?.Invoke(this, e);
         }
 
         // 削除ボタンでのDeleteIdを渡すためのイベント
@@ -107,10 +101,7 @@ namespace PhotoViewer.ViewModel
         public static event DeleteAppEventHandler DeleteAppEvent;
         protected virtual void OnDeleteAppEvent(DeleteEventArgs e)
         {
-            if (DeleteAppEvent != null)
-            {
-                DeleteAppEvent(this, e);
-            }
+            DeleteAppEvent?.Invoke(this, e);
         }
 
         /// <summary>
@@ -163,43 +154,39 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// 参照ボタンが押されたときの挙動
+        /// EXEファイル選択ダイアログを表示する
         /// </summary>
         /// <return>ファイル選択でOKが押された場合はTrueを返す</return>
-        private bool LinkAppReferenceButtonClicked(ref string _selectedExeFilePath)
+        private bool ShowExeFileSelectDialog(ref string _selectedExeFilePath)
         {
-            var dialog = new CommonOpenFileDialog();
-            dialog.Title = FolderDialogTitle;
-            dialog.EnsureReadOnly = false;
-            dialog.AllowNonFileSystemItems = false;
-            dialog.IsFolderPicker = false;
-            dialog.DefaultExtension = ".exe";
-            dialog.DefaultDirectory = Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles);
+            var _dialog = new CommonOpenFileDialog();
 
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                _selectedExeFilePath = dialog.FileName;
-                return true;
-            }
-            else
+            _dialog.Title = FolderDialogTitle;
+            _dialog.EnsureReadOnly = false;
+            _dialog.AllowNonFileSystemItems = false;
+            _dialog.IsFolderPicker = false;
+            _dialog.DefaultExtension = ".exe";
+            _dialog.DefaultDirectory = Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles);
+
+            if (_dialog.ShowDialog() != CommonFileDialogResult.Ok)
             {
                 _selectedExeFilePath = "";
                 return false;
             }
+
+            _selectedExeFilePath = _dialog.FileName;
+            return true;
         }
 
         /// <summary>
-        /// ExtraAppSettingに値をセットするメソッド
+        /// ExtraAppSettingに値をセットする
         /// </summary>
         /// <param name="_id">ID</param>
         /// <param name="_exeFileName">NAME</param>
         /// <param name="_selectExeFilePath">PATH</param>
         private ExtraAppSetting SetExtraAppSetting(int _id, string _exeFileName, string _selectExeFilePath)
         {
-            var _extraAppSetting = new ExtraAppSetting();
-            _extraAppSetting.Id = _id;
-            _extraAppSetting.Name = _exeFileName;
-            _extraAppSetting.Path = _selectExeFilePath;
+            var _extraAppSetting = new ExtraAppSetting(_id, _exeFileName, _selectExeFilePath);
             return _extraAppSetting;
         }
 
@@ -208,21 +195,22 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void LinkApp1ReferenceButtonClicked()
         {
-            string _selectExeFilePath = "";
-            bool _flag = LinkAppReferenceButtonClicked(ref _selectExeFilePath);
-            string _exeFileName = Path.GetFileNameWithoutExtension(_selectExeFilePath);
+            // 外部連携IDなどの値設定
             const int _id = 1;
+            string _selectExeFilePath = "";
 
-            // UIに反映
-            if (_flag == true)
+            // Exeファイルの選択ダイアログを表示
+            if (!ShowExeFileSelectDialog(ref _selectExeFilePath))
             {
-                LinkAppPath1 = _selectExeFilePath;
-
-                // AddExtraAppSettingCollectionに値を格納
-                var _extraAppSettingClass = new ExtraAppSetting();
-                _extraAppSettingClass = SetExtraAppSetting(_id, _exeFileName, _selectExeFilePath);
-                AddAppSettingCollection.Add(_extraAppSettingClass);
+                return;
             }
+
+            // UIに値を反映
+            LinkAppPath1 = _selectExeFilePath;
+
+            // AddExtraAppSettingCollectionに値を格納
+            var _extraAppSetting = SetExtraAppSetting(_id, Path.GetFileNameWithoutExtension(LinkAppPath1), LinkAppPath1);
+            AddAppSettingCollection.Add(_extraAppSetting);
         }
 
         /// <summary>
@@ -230,21 +218,22 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void LinkApp2ReferenceButtonClicked()
         {
-            string _selectExeFilePath = "";
-            bool _flag = LinkAppReferenceButtonClicked(ref _selectExeFilePath);
-            string _exeFileName = Path.GetFileNameWithoutExtension(_selectExeFilePath);
+            // 外部連携IDなどの値設定
             const int _id = 2;
+            string _selectExeFilePath = "";
 
-            // UIに反映
-            if (_flag == true)
+            // Exeファイルの選択ダイアログを表示
+            if (!ShowExeFileSelectDialog(ref _selectExeFilePath))
             {
-                LinkAppPath2 = _selectExeFilePath;
-
-                // AddExtraAppSettingCollectionに値を格納
-                var _extraAppSettingClass = new ExtraAppSetting();
-                _extraAppSettingClass = SetExtraAppSetting(_id, _exeFileName, _selectExeFilePath);
-                AddAppSettingCollection.Add(_extraAppSettingClass);
+                return;
             }
+
+            // UIに値を反映
+            LinkAppPath2 = _selectExeFilePath;
+
+            // AddExtraAppSettingCollectionに値を格納
+            var _extraAppSetting = SetExtraAppSetting(_id, Path.GetFileNameWithoutExtension(LinkAppPath2), LinkAppPath2);
+            AddAppSettingCollection.Add(_extraAppSetting);
         }
 
         /// <summary>
@@ -252,21 +241,22 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void LinkApp3ReferenceButtonClicked()
         {
-            string _selectExeFilePath = "";
-            bool _flag = LinkAppReferenceButtonClicked(ref _selectExeFilePath);
-            string _exeFileName = Path.GetFileNameWithoutExtension(_selectExeFilePath);
+            // 外部連携IDなどの値設定
             const int _id = 3;
+            string _selectExeFilePath = "";
 
-            // UIに反映
-            if (_flag == true)
+            // Exeファイルの選択ダイアログを表示
+            if (!ShowExeFileSelectDialog(ref _selectExeFilePath))
             {
-                LinkAppPath3 = _selectExeFilePath;
-
-                // AddExtraAppSettingCollectionに値を格納
-                var _extraAppSettingClass = new ExtraAppSetting();
-                _extraAppSettingClass = SetExtraAppSetting(_id, _exeFileName, _selectExeFilePath);
-                AddAppSettingCollection.Add(_extraAppSettingClass);
+                return;
             }
+
+            // UIに値を反映
+            LinkAppPath3 = _selectExeFilePath;
+
+            // AddExtraAppSettingCollectionに値を格納
+            var _extraAppSetting = SetExtraAppSetting(_id, Path.GetFileNameWithoutExtension(LinkAppPath3), LinkAppPath3);
+            AddAppSettingCollection.Add(_extraAppSetting);
         }
 
         /// <summary>
@@ -274,10 +264,11 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void LinkApp1DeleteButtonClicked()
         {
-            // 連携解除のため、文字列削除
-            LinkAppPath1 = "";
             const int _id = 1;
+
+            // 連携解除のため、文字列削除
             SetDeleteEvent(_id);
+            LinkAppPath1 = "";
         }
 
         /// <summary>
@@ -285,10 +276,11 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void LinkApp2DeleteButtonClicked()
         {
-            // 連携解除のため、文字列削除
-            LinkAppPath2 = "";
             const int _id = 2;
+
+            // 連携解除のため、文字列削除
             SetDeleteEvent(_id);
+            LinkAppPath2 = "";
         }
 
         /// <summary>
@@ -296,10 +288,11 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void LinkApp3DeleteButtonClicked()
         {
-            // 連携解除のため、文字列削除
-            LinkAppPath3 = "";
             const int _id = 3;
+
+            // 連携解除のため、文字列削除
             SetDeleteEvent(_id);
+            LinkAppPath3 = "";
         }
 
         /// <summary>
@@ -309,6 +302,7 @@ namespace PhotoViewer.ViewModel
         {
             DeleteEventArgs _deleteEventArgs = new DeleteEventArgs();
             _deleteEventArgs.DeleteId = _id;
+
             OnDeleteAppEvent(_deleteEventArgs);
         }
 
@@ -320,6 +314,7 @@ namespace PhotoViewer.ViewModel
             LinkAppPath1 = "";
             LinkAppPath2 = "";
             LinkAppPath3 = "";
+
             OnAllDeleteEvent(null);
         }
 
@@ -328,9 +323,14 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         private void RegisterLinkAppButtonClicked()
         {
+            // 登録予定のアプリ情報リストをイベント引数に格納
             LinkageEventArgs _linkageEventArgs = new LinkageEventArgs();
             _linkageEventArgs._addExtraAppSettingCollection = AddAppSettingCollection;
+
+            // 登録イベントを発行
             OnLinkageEvent(_linkageEventArgs);
+
+            // 追加予定の連携アプリ情報リストをクリア
             AddAppSettingCollection.Clear();
         }
     }

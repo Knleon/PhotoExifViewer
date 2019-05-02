@@ -10,7 +10,7 @@ using System.Windows.Media.Imaging;
 
 namespace PhotoViewer.ViewModel
 {
-    public class ExplorerEventArgs:EventArgs
+    public class ExplorerEventArgs : EventArgs
     {
         public string _directoryPath;
     }
@@ -45,10 +45,7 @@ namespace PhotoViewer.ViewModel
         public event ExplorerEventHandler ExplorerEvent;
         protected virtual void OnExplorerEvent(ExplorerEventArgs e)
         {
-            if(ExplorerEvent != null)
-            {
-                ExplorerEvent(this, e);
-            }
+            ExplorerEvent?.Invoke(this, e);
         }
 
         /// <summary>
@@ -90,11 +87,13 @@ namespace PhotoViewer.ViewModel
         {
             Items.Clear();
             IsDrive = _isDrive;
+
             _Directory = new DirectoryInfo(_path);
             if (_Directory.GetDirectories().Count() > 0)
             {
                 Items.Add(new TreeViewItem());
             }
+
             Header = CreateHeader();
         }
 
@@ -156,8 +155,7 @@ namespace PhotoViewer.ViewModel
         private void FileWatcher_Changed(Object _source, System.IO.FileSystemEventArgs _e)
         {
             // UIスレッドで実行させる
-            var _dispatcher = App.Current.Dispatcher;
-            _dispatcher.BeginInvoke(new Action(() =>
+            App.Current.Dispatcher.Invoke(new Action(() =>
             {
                 UpdateDirectoryNode();
             }));
@@ -189,6 +187,7 @@ namespace PhotoViewer.ViewModel
                 Margin = new Thickness(2.5, 0, 0, 0)
             });
             _stackpanel.Margin = new Thickness(0, 5, 0, 0);
+
             return _stackpanel;
         }
 

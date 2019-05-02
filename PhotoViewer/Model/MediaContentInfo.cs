@@ -12,7 +12,6 @@ namespace PhotoViewer.Model
         /// </summary>
         public enum MediaType
         {
-            UNKNOWN,
             PICTURE,
             MOVIE,
         }
@@ -100,13 +99,12 @@ namespace PhotoViewer.Model
             {
                 return MediaType.PICTURE;
             }
-
-            if (MediaContentChecker.CheckMovieExtensions(_extension))
-            {
+            else if (MediaContentChecker.CheckMovieExtensions(_extension))
+            { 
                 return MediaType.MOVIE;
             }
 
-            return MediaType.UNKNOWN;
+            throw new FileFormatException();
         }
 
         /// <summary>
@@ -133,7 +131,6 @@ namespace PhotoViewer.Model
                 case MediaType.MOVIE:
                     _thumbnailImage = ImageFileControl.CreateMovieThumbnailImage(_filePath);
                     break;
-                case MediaType.UNKNOWN:
                 default:
                     // Todo: エラー処理が必要
                     break;

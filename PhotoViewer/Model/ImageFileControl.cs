@@ -79,6 +79,7 @@ namespace PhotoViewer.Model
                         }
                     }
                     catch { }   // エラー時なので例外は握りつぶす
+
                     throw new FileLoadException();
                 }
                 finally
@@ -208,7 +209,7 @@ namespace PhotoViewer.Model
         private static BitmapSource ReadRawImage(MemoryStream _stream, int _sourceImageWidth, int _sourceImageHeight, int _viewWidth, int _viewHeight)
         {
             // Bitmapデコーダで画像を読み込む
-            BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.OnDemand);
+            BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
             BitmapSource _bitmapSource = _bmpDecoder.Frames[0];
 
             // 表示領域より大きな画像がある場合(880x660に合うようにリサイズし直す)
@@ -315,7 +316,7 @@ namespace PhotoViewer.Model
                     {
                         // Raw Image case
                         // Bitmapデコーダで画像を読み込む
-                        BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.OnDemand);
+                        BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
                         _bitmapSource = _bmpDecoder.Frames[0];
                         _bitmapSource = new WriteableBitmap(_bitmapSource);
                     }

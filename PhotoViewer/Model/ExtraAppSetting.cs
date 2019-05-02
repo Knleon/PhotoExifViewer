@@ -41,9 +41,17 @@ namespace PhotoViewer.Model
         #endregion
         
         /// <summary>
-        /// コンストラクタ
+        /// 初期化コンストラクタ
         /// </summary>
-        public ExtraAppSetting(){}
+        /// <param name="_id">連携ID</param>
+        /// <param name="_exeFileName">EXEファイルの名前</param>
+        /// <param name="_exeFilePath">EXEファイルのパス</param>
+        public ExtraAppSetting(int _id, string _exeFileName, string _exeFilePath)
+        {
+            this.Id = _id;
+            this.Name = _exeFileName;
+            this.Path = _exeFilePath;
+        }
 
         /// <summary>
         /// XMLファイルを生成し、ConfファイルをExportするメソッド
@@ -65,6 +73,7 @@ namespace PhotoViewer.Model
             {
                 Directory.CreateDirectory(_directoryPath);
             }
+
             SaveXml(_xdoc, _appFilePath);
         }
 
@@ -77,6 +86,7 @@ namespace PhotoViewer.Model
             const string _appPath = @"\Photo Exif Viewer\Photo Exif Viewer.conf";
             string _applicationDataPath = System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string _path = _applicationDataPath + _appPath;
+
             try
             {
                 ParseExtraAppXml(_path, ref _appSettingList);
@@ -97,6 +107,7 @@ namespace PhotoViewer.Model
 
             // Elementの生成
             var _datasElement = new XElement("datas");
+
             foreach(var _appSetting in _appSettingList)
             {
                 var _dataElement = new XElement("data");
@@ -133,11 +144,7 @@ namespace PhotoViewer.Model
                 XElement _nameElement = _element.Element("name");
                 XElement _pathElement = _element.Element("path");
 
-                ExtraAppSetting _extraAppSetting = new ExtraAppSetting();
-                _extraAppSetting.Id = Convert.ToInt32(_idElement.Value);
-                _extraAppSetting.Name = _nameElement.Value;
-                _extraAppSetting.Path = _pathElement.Value;
-
+                ExtraAppSetting _extraAppSetting = new ExtraAppSetting(Convert.ToInt32(_idElement.Value), _nameElement.Value, _pathElement.Value);
                 _appSettingList.Add(_extraAppSetting);
             }
         }
