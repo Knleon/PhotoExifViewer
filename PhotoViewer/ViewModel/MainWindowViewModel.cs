@@ -605,6 +605,11 @@ namespace PhotoViewer.ViewModel
             {
                 return;
             }
+            else if (_args.Cancelled == true)
+            {
+                var _worker = _sender as BackgroundWorker;
+                _worker.Dispose();
+            }
             else
             {
                 var _worker = _sender as BackgroundWorker;

@@ -14,6 +14,8 @@ namespace PhotoViewer.Model
             {
                 // 撮影日時の設定
                 SetMediaDate(_shell, _pictureContent);
+                // カメラモデルとカメラ製造元の情報の設定
+                SetCameraData(_shell, _pictureContent);
                 // 画像の幅と高さの設定
                 SetImageWidthAndHeight(_shell, _pictureContent);
                 // 画像の解像度の設定
