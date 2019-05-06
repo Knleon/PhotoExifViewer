@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +22,9 @@ namespace PhotoViewer
         // 動画の再生が終了しているかどうかのフラグ
         private bool IsPlayEnded { get; set; }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
@@ -38,6 +42,59 @@ namespace PhotoViewer
             // MainWindowのViewModelの読み込み
             MainWindowViewModel _mainWindowViewModel = new MainWindowViewModel();
             this.DataContext = _mainWindowViewModel;
+
+            // ウィンドウの位置・サイズ情報の復元
+            LoadWindowPlacement();
+        }
+
+        //
+        // ウィンドウ位置、サイズの保持
+        //
+
+        /// <summary>
+        /// ウィンドウを閉じるときの処理
+        /// </summary>
+        /// <param name="e">引数情報</param>
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            if (!e.Cancel)
+            {
+                SaveWindowPlacement();
+            }
+        }
+
+        /// <summary>
+        /// ウィンドウ位置・サイズの保存
+        /// </summary>
+        private void SaveWindowPlacement()
+        {
+            // ウィンドウ位置とサイズの取得
+            Properties.Settings.Default.WindowState = (this.WindowState == WindowState.Minimized) ? WindowState.Normal : this.WindowState;
+            Properties.Settings.Default.Bounds = this.RestoreBounds;
+
+            // 設定ファイルに保存
+            Properties.Settings.Default.Save();
+        }
+
+        /// <summary>
+        /// ウィンドウ位置・サイズの復元
+        /// </summary>
+        private void LoadWindowPlacement()
+        {
+            // 設定ファイルから読み込み
+            Properties.Settings.Default.Reload();
+
+            // 位置とサイズ情報を復元
+            Rect _bounds = Properties.Settings.Default.Bounds;
+            this.Left = _bounds.Left;
+            this.Top = _bounds.Top;
+            this.Width = _bounds.Width;
+            this.Height = _bounds.Height;
+
+            // ウィンドウの状態を復元(Normal or Maximized)
+            this.WindowState = Properties.Settings.Default.WindowState;
         }
 
         /// <summary>
