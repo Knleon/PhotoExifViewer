@@ -42,9 +42,6 @@ namespace PhotoViewer
             // MainWindowのViewModelの読み込み
             MainWindowViewModel _mainWindowViewModel = new MainWindowViewModel();
             this.DataContext = _mainWindowViewModel;
-
-            // ウィンドウの位置・サイズ情報の復元
-            LoadWindowPlacement();
         }
 
         //
@@ -52,7 +49,17 @@ namespace PhotoViewer
         //
 
         /// <summary>
-        /// ウィンドウを閉じるときの処理
+        /// ウィンドウハンドルが取得できるタイミングでウィンドウ設定情報を復元する
+        /// </summary>
+        /// <param name="e">引数情報</param>
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            LoadWindowPlacement();
+        }
+
+        /// <summary>
+        /// ウィンドウを閉じるときにウィンドウ設定情報を保存する
         /// </summary>
         /// <param name="e">引数情報</param>
         protected override void OnClosing(CancelEventArgs e)
