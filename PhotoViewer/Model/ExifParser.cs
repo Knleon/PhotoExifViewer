@@ -7,10 +7,10 @@ namespace PhotoViewer.Model
         /// <summary>
         /// ファイルプロパティを取得するメソッド
         /// </summary>
-        public static void SetFileProperty(string _filePath, PictureMediaContent _pictureContent)
+        public static void SetFileProperty(PictureMediaContent _pictureContent)
         {
             //  ファイルからプロパティを取得
-            using (var _shell = ShellObject.FromParsingName(_filePath))
+            using (var _shell = ShellObject.FromParsingName(_pictureContent.FilePath))
             {
                 // 撮影日時の設定
                 SetMediaDate(_shell, _pictureContent);
@@ -297,11 +297,8 @@ namespace PhotoViewer.Model
         /// </summary>
         public static void SetExifDataToMediaInfo(PictureMediaContent _info)
         {
-            // ファイルパスをセット
-            string _filePath = _info.FilePath;
-
             // ファイルの各プロパティを設定する
-            SetFileProperty(_filePath, _info);
+            SetFileProperty(_info);
         }
     }
 }

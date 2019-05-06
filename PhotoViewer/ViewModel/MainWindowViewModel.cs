@@ -115,10 +115,10 @@ namespace PhotoViewer.ViewModel
         #endregion
 
         // コマンドを定義
-        public ICommand ReferenceButtonCommand { get; set; }
-        public ICommand ExifDeleteButtonCommand { get; set; }
-        public ICommand GearButtonCommand { get; set; }
-        public ICommand OpenFileExplorerCommand { get; set; }
+        public ICommand ReferenceButtonCommand { get; private set; }
+        public ICommand ExifDeleteButtonCommand { get; private set; }
+        public ICommand GearButtonCommand { get; private set; }
+        public ICommand OpenFileExplorerCommand { get; private set; }
 
         // イベントを定義
         public event EventHandler ChangeSourceEvent;
@@ -433,13 +433,16 @@ namespace PhotoViewer.ViewModel
 
             foreach(var _drive in _allDrives)
             {
-                if(_drive.IsReady == true)
+                if (_drive.IsReady != true)
                 {
-                    var _explorerTree = new ExplorerTreeSourceViewModel(_drive.Name, true);
-                    _explorerTree.ExplorerEvent += UpdatePictureContentsListFromExplorer;
-
-                    ExplorerTree.Add(_explorerTree);
+                    // ドライブの準備ができていない場合は、飛ばして次へ
+                    continue;
                 }
+
+                var _explorerTree = new ExplorerTreeSourceViewModel(_drive.Name, true);
+                _explorerTree.ExplorerEvent += UpdatePictureContentsListFromExplorer;
+
+                ExplorerTree.Add(_explorerTree);
             }
         }
 
@@ -516,7 +519,7 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// メディアを読み込むスレッドの処理
+        /// メディアファイルを読み込むスレッドの処理
         /// </summary>
         private void LoadContentsWorker_DoWork(object _sender, DoWorkEventArgs _args)
         {
@@ -533,7 +536,7 @@ namespace PhotoViewer.ViewModel
         }
 
         /// <summary>
-        /// 静止画を読み込む
+        /// 静止画・動画ファイルを読み込む
         /// </summary>
         private void LoadContentsWorker(object _sender, DoWorkEventArgs _args)
         {

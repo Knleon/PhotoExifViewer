@@ -57,14 +57,14 @@ namespace PhotoViewer.ViewModel
         #endregion
 
         // 各コマンド
-        public ICommand LinkApp1ReferenceCommand { get; set; }
-        public ICommand LinkApp2ReferenceCommand { get; set; }
-        public ICommand LinkApp3ReferenceCommand { get; set; }
-        public ICommand LinkApp1DeleteCommand { get; set; }
-        public ICommand LinkApp2DeleteCommand { get; set; }
-        public ICommand LinkApp3DeleteCommand { get; set; }
-        public ICommand RegisterLinkAppCommand { get; set; }
-        public ICommand AllLinkAppDeleteCommand { get; set; }
+        public ICommand LinkApp1ReferenceCommand { get; private set; }
+        public ICommand LinkApp2ReferenceCommand { get; private set; }
+        public ICommand LinkApp3ReferenceCommand { get; private set; }
+        public ICommand LinkApp1DeleteCommand { get; private set; }
+        public ICommand LinkApp2DeleteCommand { get; private set; }
+        public ICommand LinkApp3DeleteCommand { get; private set; }
+        public ICommand RegisterLinkAppCommand { get; private set; }
+        public ICommand AllLinkAppDeleteCommand { get; private set; }
 
         // 連携アプリ情報を格納するリストを定義
         private ObservableCollection<ExtraAppSetting> extraAppSettingCollection = new ObservableCollection<ExtraAppSetting>();
