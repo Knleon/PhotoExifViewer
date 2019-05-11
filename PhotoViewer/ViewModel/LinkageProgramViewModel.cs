@@ -84,25 +84,13 @@ namespace PhotoViewer.ViewModel
         // 参照ボタンでの処理後、ExtraAppSettingを渡すためのイベント
         public delegate void LinkageEventHandler(object _sender, LinkageEventArgs e);
         public static event LinkageEventHandler LinkageEvent;
-        protected virtual void OnLinkageEvent(LinkageEventArgs e)
-        {
-            LinkageEvent?.Invoke(this, e);
-        }
 
         // 全削除ボタンでのイベント
         public static event EventHandler AllDeleteEvent;
-        protected virtual void OnAllDeleteEvent(EventArgs e)
-        {
-            AllDeleteEvent?.Invoke(this, e);
-        }
 
         // 削除ボタンでのDeleteIdを渡すためのイベント
         public delegate void DeleteAppEventHandler(object _sender, DeleteEventArgs e);
         public static event DeleteAppEventHandler DeleteAppEvent;
-        protected virtual void OnDeleteAppEvent(DeleteEventArgs e)
-        {
-            DeleteAppEvent?.Invoke(this, e);
-        }
 
         /// <summary>
         /// コマンドの設定
@@ -303,7 +291,7 @@ namespace PhotoViewer.ViewModel
             DeleteEventArgs _deleteEventArgs = new DeleteEventArgs();
             _deleteEventArgs.DeleteId = _id;
 
-            OnDeleteAppEvent(_deleteEventArgs);
+            DeleteAppEvent?.Invoke(this, _deleteEventArgs);
         }
 
         /// <summary>
@@ -315,7 +303,7 @@ namespace PhotoViewer.ViewModel
             LinkAppPath2 = "";
             LinkAppPath3 = "";
 
-            OnAllDeleteEvent(null);
+            AllDeleteEvent?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -328,7 +316,7 @@ namespace PhotoViewer.ViewModel
             _linkageEventArgs._addExtraAppSettingCollection = AddAppSettingCollection;
 
             // 登録イベントを発行
-            OnLinkageEvent(_linkageEventArgs);
+            LinkageEvent?.Invoke(this, _linkageEventArgs);
 
             // 追加予定の連携アプリ情報リストをクリア
             AddAppSettingCollection.Clear();

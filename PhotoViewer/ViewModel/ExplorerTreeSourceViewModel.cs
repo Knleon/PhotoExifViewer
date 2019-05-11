@@ -43,10 +43,6 @@ namespace PhotoViewer.ViewModel
         /// </summary>
         public delegate void ExplorerEventHandler(object _sender, ExplorerEventArgs e);
         public event ExplorerEventHandler ExplorerEvent;
-        protected virtual void OnExplorerEvent(ExplorerEventArgs e)
-        {
-            ExplorerEvent?.Invoke(this, e);
-        }
 
         /// <summary>
         /// コンストラクタ
@@ -216,7 +212,7 @@ namespace PhotoViewer.ViewModel
             SelectionItem = (this.IsSelected) ? this : (ExplorerTreeSourceViewModel)e.Source;
             ExplorerEventArgs _explorerEventArgs = new ExplorerEventArgs();
             _explorerEventArgs._directoryPath = SelectionItem._Directory.FullName;
-            OnExplorerEvent(_explorerEventArgs);
+            ExplorerEvent?.Invoke(this, _explorerEventArgs);
         }
 
         /// <summary>
