@@ -87,6 +87,12 @@ namespace PhotoViewer.Model
             string _applicationDataPath = System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string _path = _applicationDataPath + _appPath;
 
+            // ファイルが存在するか確認する
+            if (!File.Exists(_path))
+            {
+                return;
+            }
+
             try
             {
                 ParseExtraAppXml(_path, ref _appSettingList);
