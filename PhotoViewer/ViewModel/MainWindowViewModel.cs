@@ -578,7 +578,6 @@ namespace PhotoViewer.ViewModel
 
                 // ThumbnailImageの作成
                 _mediaFileInfo.ThumbnailImage = _mediaFileInfo.CreateThumbnailImage(_mediaFileInfo);
-                _mediaFileInfo.ThumbnailImage.Freeze();
 
                 // 準備できたものから先に画像をリストに登録
                 App.Current.Dispatcher.Invoke(new Action(() =>
@@ -587,14 +586,6 @@ namespace PhotoViewer.ViewModel
                 }));
 
                 System.Threading.Thread.Sleep(50);
-
-                // 大きな画像がメモリに残っていると、読み込みエラーが発生することがあるので、強制メモリ解放する(300MBを超えたら解放する)
-                if (Environment.WorkingSet > 300000000)
-                {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
-                }
             }
         }
 
@@ -768,11 +759,6 @@ namespace PhotoViewer.ViewModel
 
             _openImage = null;
             System.Threading.Thread.Sleep(50);
-
-            // 強制メモリ解放
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
         }
 
         /// <summary>

@@ -136,6 +136,14 @@ namespace PhotoViewer.Model
                     // BitmapSourceを凍結
                     _bitmapSource.Freeze();
 
+                    // サイズの大きな画像が残っていると、次の画像が読み込みできないので解放する
+                    if (_sourceImageWidth * _sourceImageHeight * 3 > 48 * 1024 * 1024)
+                    {
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
+                        GC.Collect();
+                    }
+
                     return _bitmapSource;
                 }
                 catch (Exception _ex)
@@ -169,7 +177,7 @@ namespace PhotoViewer.Model
 
             // 画像からメタデータを取得する
             _stream.Position = 0;
-            var _metaData = (BitmapFrame.Create(_stream).Metadata) as BitmapMetadata;
+            var _metaData = BitmapFrame.Create(_stream).Metadata as BitmapMetadata;
             _stream.Close();
 
             // 画像の回転情報を取得(Rotation:5,6,7,8の場合は縦画像)
@@ -209,7 +217,7 @@ namespace PhotoViewer.Model
         private static BitmapSource ReadRawImage(MemoryStream _stream, int _sourceImageWidth, int _sourceImageHeight, int _viewWidth, int _viewHeight)
         {
             // Bitmapデコーダで画像を読み込む
-            BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+            BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.None);
             BitmapSource _bitmapSource = _bmpDecoder.Frames[0];
 
             // 表示領域より大きな画像がある場合(880x660に合うようにリサイズし直す)
@@ -231,14 +239,14 @@ namespace PhotoViewer.Model
             using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
             {
                 // 画像オブジェクトの作成
-                var _frame = BitmapFrame.Create(_stream);
-                var _thumbnailSource = _frame.Thumbnail;
-                var _metaData = (_frame.Metadata) as BitmapMetadata;
+                var _bitmapFrame = BitmapFrame.Create(_stream);
+                var _thumbnailSource = _bitmapFrame.Thumbnail;
+                var _metaData = (_bitmapFrame.Metadata) as BitmapMetadata;
 
                 // サムネイルがない場合
                 if (_thumbnailSource == null)
                 {
-                    _thumbnailSource = _frame.Clone();
+                    _thumbnailSource = _bitmapFrame.Clone();
                 }
 
                 // サムネイル画像を生成する(100x75以上のものはこのサイズに収まるように縮小)
@@ -258,6 +266,14 @@ namespace PhotoViewer.Model
 
                 // BitmapSourceを凍結
                 _thumbnailSource.Freeze();
+
+                // サイズの大きな画像が残っていると、次の画像が読み込みできないので解放する
+                if (_bitmapFrame.PixelWidth * _bitmapFrame.PixelHeight * 3 > 48 * 1024 * 1024)
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
+                }
 
                 return _thumbnailSource;
             }
@@ -316,7 +332,7 @@ namespace PhotoViewer.Model
                     {
                         // Raw Image case
                         // Bitmapデコーダで画像を読み込む
-                        BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+                        BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.None);
                         _bitmapSource = _bmpDecoder.Frames[0];
                         _bitmapSource = new WriteableBitmap(_bitmapSource);
                     }
