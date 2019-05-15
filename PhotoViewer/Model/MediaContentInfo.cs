@@ -112,31 +112,28 @@ namespace PhotoViewer.Model
         /// </summary>
         /// <param name="_info">メディア情報</param>
         /// <returns>サムネイル画像</returns>
-        public BitmapSource CreateThumbnailImage(MediaContentInfo _info)
+        public bool CreateThumbnailImage()
         {
-            BitmapSource _thumbnailImage = null;
-            string _filePath = _info.FilePath;
-
-            if (_filePath == null || !File.Exists(_filePath))
+            if (this.FilePath == null || !File.Exists(this.FilePath))
             {
                 // 見つからない場合は例外を投げる
                 throw new FileNotFoundException();
             }
 
-            switch (_info.ContentMediaType)
+            switch (this.ContentMediaType)
             {
                 case MediaType.PICTURE:
-                    _thumbnailImage = ImageFileControl.CreatePictureThumnailImage(_filePath);
+                    this.ThumbnailImage = ImageFileControl.CreatePictureThumnailImage(this.FilePath);
                     break;
                 case MediaType.MOVIE:
-                    _thumbnailImage = ImageFileControl.CreateMovieThumbnailImage(_filePath);
+                    this.ThumbnailImage = ImageFileControl.CreateMovieThumbnailImage(this.FilePath);
                     break;
                 default:
                     // Todo: エラー処理が必要
-                    break;
+                    return false;
             }
 
-            return _thumbnailImage;
+            return true;
         }
     }
 

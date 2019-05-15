@@ -542,6 +542,8 @@ namespace PhotoViewer.ViewModel
         {
             List<string> _filePathsList = new List<string>();
 
+            int _tickCount = Environment.TickCount;
+
             // 選択されたフォルダ内に存在するサポートされる拡張子のファイルをすべて取得
             foreach (string _supportExt in MediaContentChecker.GetSupportExtensions())
             {
@@ -560,6 +562,8 @@ namespace PhotoViewer.ViewModel
                 }
             }
 
+            var _readyFileList = new Queue<MediaContentInfo>();
+
             // 取得したファイルを順番に処理
             foreach(var _filePath in _filePathsList)
             {
@@ -577,15 +581,38 @@ namespace PhotoViewer.ViewModel
                 _mediaFileInfo.FilePath = _filePath;
 
                 // ThumbnailImageの作成
-                _mediaFileInfo.ThumbnailImage = _mediaFileInfo.CreateThumbnailImage(_mediaFileInfo);
-
-                // 準備できたものから先に画像をリストに登録
-                App.Current.Dispatcher.Invoke(new Action(() =>
+                if (!_mediaFileInfo.CreateThumbnailImage())
                 {
-                    MediaInfoList.Add(_mediaFileInfo);
-                }));
+                    // Todo: エラー処理
+                    return;
+                }
 
-                System.Threading.Thread.Sleep(50);
+                // 準備できたものからQueueに溜める
+                int _count = 0;
+                _readyFileList.Enqueue(_mediaFileInfo);
+                _count++;
+
+                int _duration = Environment.TickCount - _tickCount;
+                if ((_count <= 100 && _duration > 500) || _duration > 1000)
+                {
+                    var _readyList = _readyFileList.ToArray();
+                    _readyFileList.Clear();
+                    _count = 0;
+                    App.Current.Dispatcher.Invoke((Action)(() => 
+                    {
+                        foreach (var _readyFile in _readyList) { MediaInfoList.Add(_readyFile); }
+                    }));
+                }
+            }
+
+            if (_readyFileList.Count > 0)
+            {
+                var _readyList = _readyFileList.ToArray();
+                App.Current.Dispatcher.Invoke((Action)(() =>
+                {
+                    foreach (var _readyFile in _readyList) { MediaInfoList.Add(_readyFile); }
+                }));
+                _readyFileList.Clear();
             }
         }
 
