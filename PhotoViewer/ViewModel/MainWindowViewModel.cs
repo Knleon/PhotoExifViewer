@@ -542,7 +542,7 @@ namespace PhotoViewer.ViewModel
         {
             List<string> _filePathsList = new List<string>();
 
-            int _tickCount = Environment.TickCount;
+            int _tick = Environment.TickCount;
 
             // 選択されたフォルダ内に存在するサポートされる拡張子のファイルをすべて取得
             foreach (string _supportExt in MediaContentChecker.GetSupportExtensions())
@@ -592,27 +592,19 @@ namespace PhotoViewer.ViewModel
                 _readyFileList.Enqueue(_mediaFileInfo);
                 _count++;
 
-                int _duration = Environment.TickCount - _tickCount;
+                int _duration = Environment.TickCount - _tick;
                 if ((_count <= 100 && _duration > 500) || _duration > 1000)
                 {
                     var _readyList = _readyFileList.ToArray();
                     _readyFileList.Clear();
-                    _count = 0;
-                    App.Current.Dispatcher.Invoke((Action)(() => 
-                    {
-                        foreach (var _readyFile in _readyList) { MediaInfoList.Add(_readyFile); }
-                    }));
+                    App.Current.Dispatcher.BeginInvoke((Action)(() => { MediaInfoList.AddRange(_readyList); }));
+                    _tick = Environment.TickCount;
                 }
             }
 
             if (_readyFileList.Count > 0)
             {
-                var _readyList = _readyFileList.ToArray();
-                App.Current.Dispatcher.Invoke((Action)(() =>
-                {
-                    foreach (var _readyFile in _readyList) { MediaInfoList.Add(_readyFile); }
-                }));
-                _readyFileList.Clear();
+                App.Current.Dispatcher.BeginInvoke((Action)(() => { foreach (var _readyFile in _readyFileList) MediaInfoList.Add(_readyFile); }));
             }
         }
 
@@ -642,7 +634,7 @@ namespace PhotoViewer.ViewModel
                 LoadPictureContentsBackgroundWorker_Reload = false;
 
                 // 別スレッドでピクチャコンテンツの更新
-                LoadContentsList();
+                UpdateContentsList();
             }
         }
 
