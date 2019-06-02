@@ -109,7 +109,7 @@ namespace PhotoViewer.Model
             MediaContentChecker.PictureType _pictureType = MediaContentChecker.CheckPictureType(_filePath, out _sourceImageWidth, out _sourceImageHeight);
 
             // 画像の読み込み
-            using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
+            using (var _stream = new WrappingStream(new MemoryStream(File.ReadAllBytes(_filePath))))
             {
                 // ファイル拡張子を取得する
                 string _extension = Path.GetExtension(_filePath).ToLower();
@@ -170,7 +170,7 @@ namespace PhotoViewer.Model
         /// <param name="_viewWidth">表示領域の幅</param>
         /// <param name="_viewHeight">表示領域の高さ</param>
         /// <returns>読み込みした画像</returns>
-        private static BitmapSource ReadNotRawImage(MemoryStream _stream, MediaContentChecker.PictureType _pictureType, int _sourceImageWidth, int _sourceImageHeight, int _viewWidth, int _viewHeight)
+        private static BitmapSource ReadNotRawImage(Stream _stream, MediaContentChecker.PictureType _pictureType, int _sourceImageWidth, int _sourceImageHeight, int _viewWidth, int _viewHeight)
         {
             // BitmapImageをデコードする(画像作成)
             BitmapSource _bitmapSource = CreateViewImageFromStream(_stream, _pictureType, _sourceImageWidth, _sourceImageHeight, _viewWidth, _viewHeight);
@@ -214,7 +214,7 @@ namespace PhotoViewer.Model
         /// <param name="_viewWidth">表示領域の幅</param>
         /// <param name="_viewHeight">表示領域の高さ</param>
         /// <returns>読み込みした画像</returns>
-        private static BitmapSource ReadRawImage(MemoryStream _stream, int _sourceImageWidth, int _sourceImageHeight, int _viewWidth, int _viewHeight)
+        private static BitmapSource ReadRawImage(Stream _stream, int _sourceImageWidth, int _sourceImageHeight, int _viewWidth, int _viewHeight)
         {
             // Bitmapデコーダで画像を読み込む
             BitmapDecoder _bmpDecoder = BitmapDecoder.Create(_stream, BitmapCreateOptions.None, BitmapCacheOption.None);
@@ -236,7 +236,7 @@ namespace PhotoViewer.Model
         /// <returns>ビットマップ画像</returns>
         public static BitmapSource CreatePictureThumnailImage(string _filePath)
         {
-            using (MemoryStream _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
+            using (var _stream = new WrappingStream(new MemoryStream(File.ReadAllBytes(_filePath))))
             {
                 // 画像オブジェクトの作成
                 var _bitmapFrame = BitmapFrame.Create(_stream);
@@ -314,7 +314,7 @@ namespace PhotoViewer.Model
 
             try
             {
-                using (var _stream = new MemoryStream(File.ReadAllBytes(_filePath)))
+                using (var _stream = new WrappingStream(new MemoryStream(File.ReadAllBytes(_filePath))))
                 {
                     string _extension = Path.GetExtension(_filePath).ToLower();
                     if (!MediaContentChecker.CheckRawImageExtensions(_extension))
@@ -361,7 +361,7 @@ namespace PhotoViewer.Model
         /// <param name="_viewWidth">表示領域の幅</param>
         /// <param name="_viewHeight">表示領域の高さ</param>
         /// <returns></returns>
-        private static BitmapImage CreateViewImageFromStream(MemoryStream _stream, MediaContentChecker.PictureType _pictureType, int _sourceWidth, int _sourceHeight, int _viewWidth, int _viewHeight)
+        private static BitmapImage CreateViewImageFromStream(Stream _stream, MediaContentChecker.PictureType _pictureType, int _sourceWidth, int _sourceHeight, int _viewWidth, int _viewHeight)
         {
             var _bitmapImage = new BitmapImage();
 

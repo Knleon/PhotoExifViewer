@@ -302,7 +302,7 @@ namespace PhotoViewer.ViewModel
 
                     // アイコン画像を読み込み
                     Icon _appIcon = Icon.ExtractAssociatedIcon(_extraAppSetting.Path);
-                    using (MemoryStream _iconStream = new MemoryStream())
+                    using (var _iconStream = new WrappingStream(new MemoryStream()))
                     {
                         _appIcon.Save(_iconStream);
                         _contextMenuControl.ContextIcon = BitmapFrame.Create(_iconStream).Clone();
