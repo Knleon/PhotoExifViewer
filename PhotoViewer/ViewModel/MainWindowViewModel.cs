@@ -597,14 +597,14 @@ namespace PhotoViewer.ViewModel
                 {
                     var _readyList = _readyFileList.ToArray();
                     _readyFileList.Clear();
-                    App.Current.Dispatcher.BeginInvoke((Action)(() => { MediaInfoList.AddRange(_readyList); }));
+                    App.Current.Dispatcher.Invoke((Action)(() => { MediaInfoList.AddRange(_readyList); }));
                     _tick = Environment.TickCount;
                 }
             }
 
             if (_readyFileList.Count > 0)
             {
-                App.Current.Dispatcher.BeginInvoke((Action)(() => { foreach (var _readyFile in _readyFileList) MediaInfoList.Add(_readyFile); }));
+                App.Current.Dispatcher.Invoke((Action)(() => { foreach (var _readyFile in _readyFileList) MediaInfoList.Add(_readyFile); }));
             }
         }
 

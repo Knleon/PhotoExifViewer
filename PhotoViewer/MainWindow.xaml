@@ -166,7 +166,7 @@
                     </Button>
                 </Grid>
                 <Border Grid.Row="1" BorderBrush="DarkGray" BorderThickness="0,1,0,1">
-                    <ListBox x:Name="mediaListBox" ItemsSource="{Binding Path=MediaInfoList}" SelectedItem="{Binding SelectedMediaInfo}" HorizontalContentAlignment="Stretch"
+                    <ListBox x:Name="mediaListBox" ItemsSource="{Binding Path=MediaInfoList}" SelectedItem="{Binding SelectedMediaInfo}"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          ScrollViewer.VerticalScrollBarVisibility="Visible" VerticalContentAlignment="Top" BorderBrush="{x:Null}"
                          ScrollViewer.IsDeferredScrollingEnabled="True"
@@ -199,6 +199,8 @@
                                 <EventSetter Event="MouseDoubleClick" Handler="ListBoxItem_MouseDoubleClick"/>
                                 <Setter Property="ToolTip" Value="{Binding FileName}"/>
                                 <Setter Property="ContextMenu" Value="{StaticResource ListBoxItemMenu}"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="VerticalContentAlignment" Value="Center"/>
                             </Style>
                         </ListBox.ItemContainerStyle>
                         <ListBox.Style>
