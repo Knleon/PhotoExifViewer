@@ -199,8 +199,10 @@
                                 <EventSetter Event="MouseDoubleClick" Handler="ListBoxItem_MouseDoubleClick"/>
                                 <Setter Property="ToolTip" Value="{Binding FileName}"/>
                                 <Setter Property="ContextMenu" Value="{StaticResource ListBoxItemMenu}"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
                                 <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
                             </Style>
                         </ListBox.ItemContainerStyle>
                         <ListBox.Style>

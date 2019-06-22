@@ -137,7 +137,7 @@ namespace PhotoViewer.Model
                     _bitmapSource.Freeze();
 
                     // サイズの大きな画像が残っていると、次の画像が読み込みできないので解放する
-                    if (_sourceImageWidth * _sourceImageHeight * 3 > 36 * 1024 * 1024)
+                    if (_sourceImageWidth * _sourceImageHeight * 4 > 36 * 1024 * 1024)
                     {
                         GC.Collect();
                         GC.WaitForPendingFinalizers();
@@ -268,7 +268,7 @@ namespace PhotoViewer.Model
                 _thumbnailSource.Freeze();
 
                 // サイズの大きな画像が残っていると、次の画像が読み込みできないので解放する
-                if (_bitmapFrame.PixelWidth * _bitmapFrame.PixelHeight * 3 > 36 * 1024 * 1024)
+                if (_bitmapFrame.PixelWidth * _bitmapFrame.PixelHeight * 4 > 36 * 1024 * 1024)
                 {
                     GC.Collect();
                     GC.WaitForPendingFinalizers();
