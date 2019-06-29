@@ -226,7 +226,7 @@
                         </ListBox.Style>
                     </ListBox>
                 </Border>
-                <Image Grid.Row="2" x:Name="viewImage" Source="{Binding ViewImageSource}" VerticalAlignment="Center"
+                <Image Grid.Row="2" x:Name="viewImage" Source="{Binding ViewImageSource}" VerticalAlignment="Center" Stretch="Uniform"
                        Width="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelWidth}" Height="{Binding RelativeSource={RelativeSource Self}, Path=Source.PixelHeight}" 
                        Margin="5" Visibility="{Binding MediaTypeOfSelected, Converter={StaticResource MediaTypeToVisibilityConverter}, ConverterParameter=PICTURE}"/>
                 <MediaElement Grid.Row="2" x:Name="viewMovieElement" Stretch="Uniform" Margin="20" Source="{Binding ViewMovieSource}"
